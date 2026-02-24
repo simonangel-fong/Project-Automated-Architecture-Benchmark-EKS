@@ -1,14 +1,18 @@
-provider "aws" {
-  region = var.aws_region
+# baseline/versions.tf
+terraform {
+  required_version = ">= 1.9.8"
 
-  default_tags {
-    tags = merge(
-      var.tags,
-      {
-        Project      = var.project_name
-        Architecture = var.arch
-        ManagedBy    = "terraform"
-      }
-    )
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.28.0"
+    }
+  }
+
+  backend "s3" {
+    bucket  = ""
+    key     = ""
+    region  = ""
+    encrypt = true
   }
 }

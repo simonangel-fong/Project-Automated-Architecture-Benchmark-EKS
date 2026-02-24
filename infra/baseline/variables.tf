@@ -1,3 +1,4 @@
+# baseline/variables.tf
 variable "project_name" {
   description = "Project name"
   type        = string
@@ -21,3 +22,6 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# current identity
+data "aws_caller_identity" "current" {}

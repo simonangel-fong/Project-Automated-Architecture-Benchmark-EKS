@@ -1,4 +1,4 @@
-# aws_vpc.tf
+# module/vpc/aws_vpc.tf
 
 # ##############################
 # VPC
