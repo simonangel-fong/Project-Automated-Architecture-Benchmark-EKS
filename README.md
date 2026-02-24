@@ -1,2 +1,12 @@
-# Project-Automated-Architecture-Benchmark-EKS
-A repo of Automated Architecture Benchmark deployed on EKS
+# Automated Architecture Benchmark (EKS)
+
+One Pipeline. Four Designs. Real Metrics.
+
+- [Automated Architecture Benchmark (EKS)](#automated-architecture-benchmark-eks)
+  - [Project Overview](#project-overview)
+
+## Project Overview
+
+
+
+- [Init EKS](./docs/init_eks.md)
