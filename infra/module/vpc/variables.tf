@@ -1,5 +1,5 @@
 # module/vpc/variables.tf
-variable "aws_region" {
+variable "region" {
   type = string
 }
 

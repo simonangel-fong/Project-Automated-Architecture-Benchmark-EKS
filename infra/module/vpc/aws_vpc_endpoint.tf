@@ -1,34 +1,34 @@
-# # aws_vpc_endpoint.tf
+# aws_vpc_endpoint.tf
 
-# # #################################
-# # SG: Interface Endpoints
-# # #################################
-# resource "aws_security_group" "vpc_endpoint" {
-#   name        = "${var.vpc_name}-sg-vpc-endpoint"
-#   description = "Security group for VPC interface endpoints (ECR API/DKR)"
-#   vpc_id      = aws_vpc.main.id
+# #################################
+# SG: Interface Endpoints
+# #################################
+resource "aws_security_group" "vpc_endpoint" {
+  name        = "${var.vpc_name}-sg-vpc-endpoint"
+  description = "Security group for VPC interface endpoints (ECR API/DKR)"
+  vpc_id      = aws_vpc.main.id
 
-#   ingress {
-#     description = "Allow HTTPS ingress"
-#     from_port   = 443
-#     to_port     = 443
-#     protocol    = "tcp"
-#     # security_groups = ["*"]
-#     cidr_blocks = [aws_vpc.main.cidr_block]
-#   }
+  ingress {
+    description = "Allow HTTPS ingress"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    # security_groups = ["*"]
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
 
-#   egress {
-#     description = "Allow all egress"
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = [aws_vpc.main.cidr_block]
-#   }
+  egress {
+    description = "Allow all egress"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
 
-#   tags = {
-#     Name = "${var.vpc_name}-sg-vpc-endpoint"
-#   }
-# }
+  tags = {
+    Name = "${var.vpc_name}-sg-vpc-endpoint"
+  }
+}
 
 # # #################################
 # # VPC Endpoints:

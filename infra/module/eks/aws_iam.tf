@@ -78,52 +78,21 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryPullOn
   role       = aws_iam_role.node.name
 }
 
-# ##############################
-# Access Entry: admin identity
-# ##############################
-resource "aws_eks_access_entry" "admin_access" {
-  cluster_name  = aws_eks_cluster.cluster.name
-  principal_arn = var.admin_arn
-}
-
-resource "aws_eks_access_policy_association" "admin" {
-  cluster_name  = aws_eks_cluster.cluster.name
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = var.admin_arn
-
-  access_scope {
-    type = "cluster"
-  }
-  depends_on = [aws_eks_access_entry.admin_access]
-}
-
-
 # # ##############################
-# # IAM: pull ECR image
+# # Access Entry: admin identity
 # # ##############################
-# data "aws_iam_policy_document" "ecr_assume_role_policy" {
-#   statement {
-#     actions = ["sts:AssumeRole"]
-#     principals {
-#       type        = "Service"
-#       identifiers = ["pods.eks.amazonaws.com"]
-#     }
+# resource "aws_eks_access_entry" "admin_access" {
+#   cluster_name  = aws_eks_cluster.cluster.name
+#   principal_arn = var.admin_arn
+# }
+
+# resource "aws_eks_access_policy_association" "admin" {
+#   cluster_name  = aws_eks_cluster.cluster.name
+#   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+#   principal_arn = var.admin_arn
+
+#   access_scope {
+#     type = "cluster"
 #   }
-# }
-
-# resource "aws_iam_role" "eks_pull_ecr_image" {
-#   name               = "eks-ecr-image"
-#   assume_role_policy = data.aws_iam_policy_document.ecr_assume_role_policy.json
-# }
-
-# resource "aws_iam_role_policy_attachment" "ecr_read_only" {
-#   role       = aws_iam_role.eks_pull_ecr_image.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-# }
-
-# resource "aws_eks_pod_identity_association" "pod_identity_association" {
-#   cluster_name     = aws_eks_cluster.cluster.name
-#   role_arn         = aws_iam_role.eks_pull_ecr_image.arn
-#   namespace        = "default" 
-#   service_account  = "default"
+#   depends_on = [aws_eks_access_entry.admin_access]
 # }
