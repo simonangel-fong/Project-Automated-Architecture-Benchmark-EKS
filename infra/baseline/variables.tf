@@ -58,3 +58,41 @@ variable "max_size" {
   type    = number
   default = 4
 }
+
+variable "app_namespace" {
+  type    = string
+  default = "backend"
+}
+
+# ##############################
+# AWS RDS
+# ##############################
+variable "instance_class" {
+  type    = string
+  default = "db.t4g.medium"
+}
+
+variable "rds_max_connection" {
+  type    = number
+  default = 400
+}
+
+variable "db_name" {
+  type = string
+}
+
+variable "db_username" {
+  type = string
+}
+
+variable "db_password" {
+  type = string
+}
+
+variable "db_app_pwd" {
+  type = string
+}
+
+variable "db_readonly_pwd" {
+  type = string
+}

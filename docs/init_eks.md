@@ -27,7 +27,12 @@ terraform -chdir=infra/baseline apply -auto-approve
 aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 # Updated context ...cluster/eks-benchmark-baseline-cluster in .kube\config
 
+# kubectl config get-contexts
+# kubectl config delete-context
+
 kubectl apply -f k8s/baseline/
+kubectl apply -f k8s/baseline/secret_store.yaml
+kubectl apply -f k8s/baseline/external-secret.yaml
 ```
 
 ---
@@ -36,4 +41,6 @@ kubectl apply -f k8s/baseline/
 
 ```sh
 kubectl delete -f k8s/baseline/ && terraform -chdir=infra/baseline destroy -auto-approve
+
+terraform -chdir=infra/baseline destroy -auto-approve -target=helm_release.external_secrets
 ```
