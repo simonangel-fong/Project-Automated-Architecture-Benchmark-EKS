@@ -1,4 +1,15 @@
 apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: nginx
+  name: web
+spec:
+  containers:
+  - name: web
+    image: nginx
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: nginx-svc
@@ -20,6 +31,11 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/tags: |
+      Name:benchmark-baseline,
+      Project=benchmark,
+      Architecture=baseline,
+      ManagedBy=kubernetes
 spec:
   ingressClassName: alb
   rules:

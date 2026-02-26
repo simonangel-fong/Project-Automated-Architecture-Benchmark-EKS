@@ -1,9 +1,7 @@
 # baseline/main.tf
-
-data "aws_availability_zones" "available" {}
-
 locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, 3)
+  vpc_name     = "${var.project_name}-${var.arch}"
+  cluster_name = "${var.project_name}-${var.arch}"
 }
 
 # #########################
@@ -13,7 +11,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "6.6.0"
 
-  name = "${var.project_name}-${var.arch}"
+  name = local.vpc_name
   cidr = "10.0.0.0/16"
 
   azs             = ["ca-central-1a", "ca-central-1b", "ca-central-1d"]
@@ -22,49 +20,65 @@ module "vpc" {
 
   enable_nat_gateway = true
   enable_vpn_gateway = true
+
+  tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+  }
+
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = "1"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = "1"
+  }
 }
 
-# # #########################
-# # EKS Cluster
-# # #########################
-# module "eks" {
-#   source  = "terraform-aws-modules/eks/aws"
-#   version = "~> 21.0"
+# #########################
+# EKS Cluster
+# #########################
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
 
-#   name               = "${var.project_name}-${var.arch}"
-#   kubernetes_version = "1.34"
+  name               = local.cluster_name
+  kubernetes_version = var.kube_version
 
-#   addons = {
-#     kube-proxy = {}
-#     vpc-cni = {
-#       before_compute = true
-#     }
-#     coredns = {}
-#     eks-pod-identity-agent = {
-#       before_compute = true
-#     }
-#   }
+  addons = {
+    kube-proxy = {}
+    vpc-cni = {
+      before_compute = true
+    }
+    coredns = {}
+    eks-pod-identity-agent = {
+      before_compute = true
+    }
+  }
 
-#   endpoint_public_access = true
+  endpoint_public_access = true
 
-#   # Adds the current caller identity as an administrator
-#   enable_cluster_creator_admin_permissions = true
+  # Adds the current caller identity as an administrator
+  enable_cluster_creator_admin_permissions = true
 
-#   vpc_id                   = module.vpc.vpc_id
-#   subnet_ids               = module.vpc.public_subnet_id
-#   control_plane_subnet_ids = module.vpc.private_subnet_id
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
 
-#   # EKS Managed Node Group
-#   eks_managed_node_groups = {
-#     default = {
-#       ami_type       = "BOTTLEROCKET_x86_64"
-#       instance_types = var.node_instance_types
+  # EKS Managed Node Group
+  eks_managed_node_groups = {
+    default = {
+      ami_type       = "BOTTLEROCKET_x86_64"
+      instance_types = var.node_instance_types
+      min_size       = var.min_size
+      max_size       = var.max_size
+      desired_size   = var.desired_size
 
-#       min_size     = var.min_size
-#       max_size     = var.max_size
-#       desired_size = var.desired_size
+      capacity_type = "ON_DEMAND"
+    }
+  }
+}
 
-#       capacity_type = "ON_DEMAND"
-#     }
-#   }
+# output "test" {
+#   value = module.eks.connect
 # }
