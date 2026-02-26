@@ -78,7 +78,3 @@ module "eks" {
     }
   }
 }
-
-# output "test" {
-#   value = module.eks.connect
-# }

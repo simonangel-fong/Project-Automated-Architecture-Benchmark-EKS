@@ -1,15 +1,12 @@
+
+locals {
+  oidc_provider     = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${module.eks.oidc_provider}"
+}
+
 # ###################################
 # IAM Role for serviceaccount in eks
 # ###################################
-locals {
-  oidc_provider = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
-}
-
-data "aws_iam_openid_connect_provider" "eks" {
-  url = module.eks.cluster_oidc_issuer_url
-}
-
-
 resource "aws_iam_role" "lbc" {
   name = "${module.eks.cluster_name}-role-lbc"
 
@@ -18,7 +15,7 @@ resource "aws_iam_role" "lbc" {
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Federated = data.aws_iam_openid_connect_provider.eks.arn
+        Federated = local.oidc_provider_arn
       }
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
