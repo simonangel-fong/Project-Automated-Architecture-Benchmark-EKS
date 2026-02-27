@@ -36,3 +36,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 backend.config
+.env
+test/k6/report

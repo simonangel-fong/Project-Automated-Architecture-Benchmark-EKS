@@ -1,18 +1,16 @@
-# baseline/cf_dns.tf
+# # baseline/cf_dns.tf
 
-data "aws_lb" "alb" {
-  name = "${var.project_name}-${var.arch}"
-}
+# locals {
+#   alb_dns = try(kubernetes_ingress_v1.nginx_alb.status[0].load_balancer[0].ingress[0].hostname, null)
+# }
 
-# ########################################
-# Cloudflare
-# ########################################
-resource "cloudflare_record" "dns_record" {
-  zone_id = var.cloudflare_zone_id
-  name    = local.dns_record
-  # content = aws_cloudfront_distribution.cdn.domain_name
-  content = data.aws_lb.alb.dns_name
-  type    = "CNAME"
-  ttl     = 1
-  proxied = true
-}
+# resource "cloudflare_record" "dns_record" {
+#   for_each = local.alb_dns == null ? {} : { "this" = local.alb_dns }
+
+#   zone_id = var.cloudflare_zone_id
+#   name    = local.dns_record
+#   content = each.value
+#   type    = "CNAME"
+#   ttl     = 1
+#   proxied = true
+# }

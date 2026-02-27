@@ -6,9 +6,9 @@
   - [AWS Init](#aws-init)
   - [K8s Cluster](#k8s-cluster)
   - [Remove](#remove)
-  - [ESO](#eso)
   - [Init DB Job](#init-db-job)
   - [Update DNS](#update-dns)
+  - [Test](#test)
 
 ---
 
@@ -44,41 +44,9 @@ kubectl -n backend get po
 ## Remove
 
 ```sh
+terraform -chdir=infra/baseline destroy -auto-approve -target=cloudflare_record.dns_record
+
 kubectl delete -f k8s/baseline/ && terraform -chdir=infra/baseline destroy -auto-approve
-
-terraform -chdir=infra/baseline destroy -auto-approve -target=helm_release.external_secrets
-```
-
----
-
-## ESO
-
-```sh
-kubectl apply -f k8s/baseline/secret_store.yaml
-# clustersecretstore.external-secrets.io/aws-secrets-global created
-
-kubectl -n backend get clustersecretstore aws-secrets-global
-# NAME                 AGE     STATUS   CAPABILITIES   READY
-# aws-secrets-global   3m25s   Valid    ReadWrite      True
-
-kubectl apply -f k8s/baseline/external-secret.yaml
-# externalsecret.external-secrets.io/app-cred created
-
-kubectl -n backend get externalsecret app-cred
-# NAME       STORETYPE            STORE                REFRESH INTERVAL   STATUS         READY
-# app-cred   ClusterSecretStore   aws-secrets-global   1h0m0s             SecretSynced   True
-
-kubectl -n backend describe externalsecret app-cred
-# Events:
-#   Type     Reason        Age                    From              Message
-#   ----     ------        ----                   ----              -------
-#   Normal   Created       72s                    external-secrets  secret created
-
-kubectl -n backend get secret app-cred
-# NAME       TYPE     DATA   AGE
-# app-cred   Opaque   5      101s
-
-kubectl -n backend get po
 ```
 
 ---
@@ -98,4 +66,22 @@ kubectl -n backend get jobs
 ```sh
 # update dns when ingress integrated with alb gets updated
 terraform -chdir=infra/baseline apply -target=cloudflare_record.dns_record -auto-approve
+```
+
+---
+
+## Test
+
+```sh
+# smoke
+docker run --rm --name baseline_aws_smoke -p 5665:5665 -e SOLUTION_ID="baseline" -e BASE_URL="https://benchmark-eks-baseline.arguswatcher.net" -e K6_WEB_DASHBOARD=true -e K6_WEB_DASHBOARD_EXPORT=/report/baseline_aws_smoke.html -e K6_WEB_DASHBOARD_PERIOD=3s -v ./test/k6/script:/script -v ./test/k6/report:/report/ grafana/k6 run /script/test_smoke.js
+
+# read heavy
+docker run --rm --name baseline_aws_read -p 5665:5665 -e SOLUTION_ID="baseline" -e BASE_URL="https://benchmark-eks-baseline.arguswatcher.net" -e K6_WEB_DASHBOARD=true -e K6_WEB_DASHBOARD_EXPORT=/report/baseline_aws_read.html -e K6_WEB_DASHBOARD_PERIOD=3s -v ./test/k6/script:/script -v ./test/k6/report:/report/ grafana/k6 run /script/test_hp_read.js
+
+# write heavy
+docker run --rm --name baseline_aws_write -p 5665:5665 -e SOLUTION_ID="baseline" -e BASE_URL="https://benchmark-eks-baseline.arguswatcher.net" -e K6_WEB_DASHBOARD=true -e K6_WEB_DASHBOARD_EXPORT=/report/baseline_aws_write.html -e K6_WEB_DASHBOARD_PERIOD=3s -v ./test/k6/script:/script -v ./test/k6/report:/report/ grafana/k6 run /script/test_hp_write.js
+
+# mixed
+docker run --rm --name baseline_aws_mixed -p 5665:5665 -e SOLUTION_ID="baseline" -e BASE_URL="https://benchmark-eks-baseline.arguswatcher.net" -e K6_WEB_DASHBOARD=true -e K6_WEB_DASHBOARD_EXPORT=/report/baseline_aws_mixed.html -e K6_WEB_DASHBOARD_PERIOD=3s -v ./test/k6/script:/script -v ./test/k6/report:/report/ grafana/k6 run /script/test_hp_mixed.js
 ```

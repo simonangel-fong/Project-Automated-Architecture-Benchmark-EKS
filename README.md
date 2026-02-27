@@ -9,3 +9,4 @@ One Pipeline. Four Designs. Real Metrics.
 
 - [Init EKS](./docs/init_eks.md)
 - [AWS Load Balancer Controller & Kubernetes Ingress](./docs/albc_ingress.md)
+- [ESO](./docs/eso.md)
