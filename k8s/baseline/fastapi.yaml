@@ -45,7 +45,7 @@ spec:
             - configMapRef:
                 name: fastapi-config
 
-          # env from secret created by eso
+          # env from eso secret
           env:
             - name: POSTGRES__HOST
               valueFrom:
