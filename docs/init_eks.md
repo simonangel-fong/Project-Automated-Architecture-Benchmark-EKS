@@ -7,6 +7,8 @@
   - [K8s Cluster](#k8s-cluster)
   - [Remove](#remove)
   - [ESO](#eso)
+  - [Init DB Job](#init-db-job)
+  - [Update DNS](#update-dns)
 
 ---
 
@@ -77,4 +79,23 @@ kubectl -n backend get secret app-cred
 # app-cred   Opaque   5      101s
 
 kubectl -n backend get po
+```
+
+---
+
+## Init DB Job
+
+```sh
+kubectl apply -f k8s/baseline/flyway.yaml
+kubectl -n backend logs -l job-name=init-db-flyway -f
+kubectl -n backend get jobs
+```
+
+---
+
+## Update DNS
+
+```sh
+# update dns when ingress integrated with alb gets updated
+terraform -chdir=infra/baseline apply -target=cloudflare_record.dns_record -auto-approve
 ```
