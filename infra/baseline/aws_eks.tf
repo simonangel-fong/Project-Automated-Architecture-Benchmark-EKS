@@ -1,8 +1,8 @@
 # baseline/aws_eks.tf
 
 locals {
-  oidc_provider     = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
-  oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${module.eks.oidc_provider}"
+  oidc_provider = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  # oidc_provider_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${module.eks.oidc_provider}"
 }
 
 # #########################

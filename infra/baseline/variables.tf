@@ -1,4 +1,7 @@
 # baseline/variables.tf
+# ##############################
+# Project
+# ##############################
 variable "project_name" {
   description = "Project name"
   type        = string
@@ -11,6 +14,9 @@ variable "arch" {
   default     = "baseline"
 }
 
+# ##############################
+# AWS
+# ##############################
 variable "aws_region" {
   description = "AWS region"
   type        = string
@@ -27,9 +33,10 @@ variable "tags" {
 data "aws_caller_identity" "current" {}
 
 # ##############################
-# VPC
+# Cloudflare
 # ##############################
-
+variable "cloudflare_api_token" { type = string }
+variable "cloudflare_zone_id" { type = string }
 
 # ##############################
 # EKS
@@ -95,4 +102,16 @@ variable "db_app_pwd" {
 
 variable "db_readonly_pwd" {
   type = string
+}
+
+# ##############################
+# AWS Cloudfront
+# ##############################
+variable "domain_name" {
+  type    = string
+  default = "arguswatcher.net"
+}
+
+locals {
+  dns_record = "benchmark-eks-${var.arch}.${var.domain_name}"
 }

@@ -1,4 +1,4 @@
-
+# baseline/fastapi.yaml
 # configMap
 apiVersion: v1
 kind: ConfigMap
@@ -6,29 +6,13 @@ metadata:
   name: fastapi-config
   namespace: backend
 data:
-  APP_NAME: "eks-benchmark"
-  ENV: "dev"
+  PROJECT: "eks-benchmark1"
+  ENV: "baseline"
   DEBUG: "true"
   LOG_LEVEL: "info"
-
-  POSTGRES__HOST: "pgdb_host"
-  POSTGRES__PORT: "5432"
-  POSTGRES__DB: "pgdb_db"
-  POSTGRES__USER: "pgdb_user"
-
   POOL_SIZE: "5"
   MAX_OVERFLOW: "0"
   WORKER: "1"
----
-# secrets
-apiVersion: v1
-kind: Secret
-metadata:
-  name: fastapi-secret
-  namespace: backend
-type: Opaque
-stringData:
-  POSTGRES__PASSWORD: "pgdb_pwd"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -56,42 +40,40 @@ spec:
               containerPort: 8000
               protocol: TCP
 
-          # env from configmap + secret
+          # env from configmap
           envFrom:
             - configMapRef:
                 name: fastapi-config
-            - secretRef:
-                name: fastapi-secret
 
-          # env:
-          #   - name: DB_HOST
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: db-credentials
-          #         key: DB_HOST
-          #   - name: DB_PORT
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: db-credentials
-          #         key: DB_PORT
-          #   - name: DB_NAME
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: db-credentials
-          #         key: DB_NAME
-          #   - name: DB_USERNAME
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: db-credentials
-          #         key: DB_USERNAME
-          #   - name: DB_PASSWORD
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: db-credentials
-          #         key: DB_PASSWORD
+          # env from secret created by eso
+          env:
+            - name: POSTGRES__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__HOST
+            - name: POSTGRES__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PORT
+            - name: POSTGRES__DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__DB
+            - name: POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__USER
+            - name: POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PASSWORD
 
-
-          # health check: ECS used curl; in k8s we can do HTTP probes directly
+          # health check
           readinessProbe:
             httpGet:
               path: /api/health/
@@ -110,7 +92,6 @@ spec:
             failureThreshold: 5
             initialDelaySeconds: 30
 
-          # ECS startPeriod=90 -> approximate in k8s with startupProbe
           startupProbe:
             httpGet:
               path: /api/health/
@@ -118,13 +99,11 @@ spec:
             periodSeconds: 10
             failureThreshold: 9  # ~90s total (9 * 10s)
 
-          # stopTimeout: 30 -> terminationGracePeriodSeconds
           lifecycle:
             preStop:
               exec:
                 command: ["sh", "-c", "sleep 5"]
 
-          # resources: map ECS cpu/mem to k8s requests/limits (placeholders)
           resources:
             requests:
               cpu: "250m"
