@@ -7,6 +7,8 @@ One Pipeline. Four Designs. Real Metrics.
 
 ## Project Overview
 
-- [Init EKS](./docs/init_eks.md)
-- [AWS Load Balancer Controller & Kubernetes Ingress](./docs/albc_ingress.md)
-- [ESO](./docs/eso.md)
+- [Baseline](./docs/baseline.md)
+- [Init Kubernetes](./docs/init_k8s.md)
+  - [AWS Load Balancer Controller](./docs/lbc.md)
+  - [External Secret Operator](./docs/eso.md)
+  - [External DNS](./docs/dns.md)

@@ -65,47 +65,49 @@ resource "aws_iam_role_policy_attachment" "eso" {
   policy_arn = aws_iam_policy.eso.arn
 }
 
-# ###################################
-# Kubernetes resources
-# ###################################
-# Create ns for eso
-resource "kubernetes_namespace_v1" "eso" {
-  metadata {
-    name = "external-secrets"
-    labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
-    }
-  }
-}
+# # ###################################
+# # Kubernetes resources
+# # ###################################
+# # Create ns for eso
+# resource "kubernetes_namespace_v1" "eso" {
+#   metadata {
+#     name = "external-secrets"
+#     labels = {
+#       "app.kubernetes.io/managed-by" = "terraform"
+#     }
+#   }
+# }
 
-# create ServiceAccount with Role
-resource "kubernetes_service_account_v1" "eso" {
-  metadata {
-    name      = "external-secrets"
-    namespace = local.namespace_eso
-    annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
-    }
-  }
-  depends_on = [kubernetes_namespace_v1.eso]
-}
+# # create ServiceAccount with Role
+# resource "kubernetes_service_account_v1" "eso" {
+#   metadata {
+#     name      = "external-secrets"
+#     namespace = local.namespace_eso
+#     annotations = {
+#       "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
+#     }
+#   }
+#   # depends_on = [kubernetes_namespace_v1.eso]
+# }
 
-# ###################################
-# Helm: Install packages
-# ###################################
-# AWS External Secrets
-resource "helm_release" "external_secrets" {
-  name             = "external-secrets"
-  namespace        = kubernetes_namespace_v1.eso.metadata[0].name
-  repository       = "https://charts.external-secrets.io"
-  chart            = "external-secrets"
-  create_namespace = false
+# # ###################################
+# # Helm: Install packages
+# # ###################################
+# # AWS External Secrets
+# resource "helm_release" "external_secrets" {
+#   name      = "external-secrets"
+#   namespace = kubernetes_namespace_v1.eso.metadata[0].name
+#   # namespace        = local.namespace_eso
+#   repository       = "https://charts.external-secrets.io"
+#   chart            = "external-secrets"
+#   version          = "2.0.1"
+#   create_namespace = false
 
-  set = [
-    { name = "installCRDs", value = "true" },
-    { name = "serviceAccount.create", value = "false" },
-    { name = "serviceAccount.name", value = kubernetes_service_account_v1.eso.metadata[0].name },
-  ]
+#   set = [
+#     { name = "installCRDs", value = "true" },
+#     { name = "serviceAccount.create", value = "false" },
+#     { name = "serviceAccount.name", value = kubernetes_service_account_v1.eso.metadata[0].name },
+#   ]
 
-  depends_on = [kubernetes_service_account_v1.eso]
-}
+#   depends_on = [kubernetes_service_account_v1.eso]
+# }
