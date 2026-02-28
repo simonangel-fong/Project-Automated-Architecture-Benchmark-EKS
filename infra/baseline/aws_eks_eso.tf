@@ -1,7 +1,10 @@
 # baseline/aws_eks_eso.tf
 
 locals {
-  namespace_eso = "external-secrets"
+  eso_namespace            = "external-secrets"
+  eso_serviceaccount       = "external-secrets"
+  eso_helm_release         = "external-secrets"
+  eso_cluster_secret_store = "aws-secrets-global"
 }
 
 # ###################################
@@ -78,36 +81,53 @@ resource "aws_iam_role_policy_attachment" "eso" {
 #   }
 # }
 
-# # create ServiceAccount with Role
-# resource "kubernetes_service_account_v1" "eso" {
-#   metadata {
-#     name      = "external-secrets"
-#     namespace = local.namespace_eso
-#     annotations = {
-#       "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
-#     }
-#   }
-#   # depends_on = [kubernetes_namespace_v1.eso]
-# }
+# ###################################
+# Helm: Install packages
+# ###################################
+# AWS External Secrets
+resource "helm_release" "external_secrets" {
+  name             = local.eso_helm_release
+  namespace        = local.eso_namespace
+  repository       = "https://charts.external-secrets.io"
+  chart            = "external-secrets"
+  version          = "2.0.1"
+  create_namespace = true
 
-# # ###################################
-# # Helm: Install packages
-# # ###################################
-# # AWS External Secrets
-# resource "helm_release" "external_secrets" {
-#   name      = "external-secrets"
-#   namespace = kubernetes_namespace_v1.eso.metadata[0].name
-#   # namespace        = local.namespace_eso
-#   repository       = "https://charts.external-secrets.io"
-#   chart            = "external-secrets"
-#   version          = "2.0.1"
-#   create_namespace = false
+  values = [
+    yamlencode({
+      serviceAccount = {
+        create = true
+        name   = local.eso_serviceaccount
+        annotations = {
+          "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
+        }
+      }
+    })
+  ]
+}
 
-#   set = [
-#     { name = "installCRDs", value = "true" },
-#     { name = "serviceAccount.create", value = "false" },
-#     { name = "serviceAccount.name", value = kubernetes_service_account_v1.eso.metadata[0].name },
-#   ]
-
-#   depends_on = [kubernetes_service_account_v1.eso]
-# }
+resource "kubernetes_manifest" "eso" {
+  manifest = {
+    apiVersion = "external-secrets.io/v1"
+    kind       = "ClusterSecretStore"
+    metadata = {
+      name = local.eso_cluster_secret_store
+    }
+    spec = {
+      provider = {
+        aws = {
+          service = "SecretsManager"
+          region  = var.aws_region
+          auth = {
+            jwt = {
+              serviceAccountRef = {
+                name      = local.eso_serviceaccount
+                namespace = local.eso_namespace
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

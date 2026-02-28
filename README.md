@@ -9,6 +9,6 @@ One Pipeline. Four Designs. Real Metrics.
 
 - [Baseline](./docs/baseline.md)
 - [Init Kubernetes](./docs/init_k8s.md)
-  - [AWS Load Balancer Controller](./docs/lbc.md)
   - [External Secret Operator](./docs/eso.md)
+  - [AWS Load Balancer Controller](./docs/lbc.md)
   - [External DNS](./docs/dns.md)

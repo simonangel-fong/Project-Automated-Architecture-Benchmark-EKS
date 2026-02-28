@@ -113,5 +113,5 @@ variable "domain_name" {
 }
 
 locals {
-  dns_record = "benchmark-eks-${var.arch}.${var.domain_name}"
+  dns_record = "eks-benchmark-${var.arch}.${var.domain_name}"
 }

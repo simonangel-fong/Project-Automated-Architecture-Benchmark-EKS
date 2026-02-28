@@ -28,11 +28,11 @@ helm upgrade --install external-dns external-dns/external-dns -n external-dns --
 kubectl apply -f manifest/baseline
 
 # test
-curl https://benchmark-eks-baseline.arguswatcher.net/
+curl https://eks-benchmark-baseline.arguswatcher.net/
 
-curl -v https://eks-benchmark-baseline-1698995919.ca-central-1.elb.amazonaws.com/ -H "benchmark-eks-baseline.arguswatcher.net"
+curl -v https://eks-benchmark-baseline-1698995919.ca-central-1.elb.amazonaws.com/ -H "eks-benchmark-baseline.arguswatcher.net"
 
-curl http://benchmark-eks-baseline.arguswatcher.net/api/
+curl http://eks-benchmark-baseline.arguswatcher.net/api/
 ```
 
 - Debug
