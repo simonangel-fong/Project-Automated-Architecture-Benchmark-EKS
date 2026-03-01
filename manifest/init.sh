@@ -1,18 +1,7 @@
 # manifest/init.sh
-
 #!/bin/bash
 
 set -Eeuo pipefail
-
-REGION="$REGION"
-CLUSTER_NAME="$CLUSTER_NAME"
-VPC_ID="$VPC_ID"
-ARCH="$ARCH"
-
-IAM_ESO_ROLE_ARN="$IAM_ESO_ROLE_ARN"
-IAM_LBC_ROLE_ARN="$IAM_LBC_ROLE_ARN"
-
-CF_TOKEN="$CF_TOKEN"
 
 # add kubeconfig
 aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
@@ -23,7 +12,7 @@ echo "# Setup external eso"
 echo "# #################################"
 echo
 
-helm repo add external-secrets https://charts.external-secrets.io
+helm repo add --force-update external-secrets https://charts.external-secrets.io
 helm repo update external-secrets
 helm upgrade --install external-secrets external-secrets/external-secrets \
     -n external-secrets \
@@ -40,14 +29,14 @@ echo "# Setup external lbc"
 echo "# #################################"
 echo
 
-helm repo add eks https://aws.github.io/eks-charts
+helm repo add eks --force-update https://aws.github.io/eks-charts
 helm repo update
 helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
     -n kube-system      \
     --version "3.1.0"   \
-    --set clusterName=$CLUSTER_NAME \
-    --set vpcId=$VPC_ID             \
-    --set region=$REGION
+    --set clusterName=$CLUSTER_NAME
+    # --set vpcId=$VPC_ID     \
+    # --set region=$region    \
 
 kubectl annotate -n kube-system sa aws-load-balancer-controller eks.amazonaws.com/role-arn="$IAM_LBC_ROLE_ARN" --overwrite
 
@@ -57,12 +46,14 @@ echo "# Setup external dns"
 echo "# #################################"
 echo
 
+kubectl create ns external-dns --dry-run=client -o yaml | kubectl apply -f -
+
 # create secret for cf
 kubectl -n external-dns create secret generic cloudflare-api-key \
-  ---from-literal=apiKey=$CF_TOKEN \
-  --dry-run=client -o yaml | kubectl apply -f -
+    --from-literal=apiKey="$CF_TOKEN" \
+    --dry-run=client -o yaml | kubectl apply -f -
 
-helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+helm repo add external-dns --force-update https://kubernetes-sigs.github.io/external-dns/ 
 helm repo update
 helm upgrade --install external-dns external-dns/external-dns \
     -n external-dns \
@@ -74,8 +65,7 @@ helm upgrade --install external-dns external-dns/external-dns \
     --set domainFilters[0]=arguswatcher.net \
     --set env[0].name=CF_API_TOKEN \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key \
-    --set env[0].valueFrom.secretKeyRef.key=apiKey  \
-    --set cloudflare.proxied=true
+    --set env[0].valueFrom.secretKeyRef.key=apiKey
 
 echo
 echo "# #################################"
@@ -83,5 +73,7 @@ echo "#  Apply Application"
 echo "# #################################"
 echo
 
-kubectl apply -f ./init.yaml
-kubectl apply -f ./$ARCH
+kubectl apply -f ./ns.yaml
+kubectl apply -f ./external-secrets.yaml
+kubectl apply -f ./fastapi.yaml
+kubectl apply -f ./ingress.yaml
