@@ -41,12 +41,29 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 60
         steps:
-            - name: Checkout
+            - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Delete K8s Resources
+            - name: Configure AWS credentials (OIDC)
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.aws_tf_role_arn}}
+                  aws-region: ${{ inputs.aws_region }}
+
+            - name: Set up kubectl
+              uses: azure/setup-kubectl@v3
+              with:
+                  version: "v1.34.0"
+
+            - name: Update kubeconfig
               run: |
-                bash manifest/destroy.sh 
+                  echo "${{ inputs.project }}-${{ inputs.arch }}"
+                  aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
+
+            - name: Install Helm
+              uses: azure/setup-helm@v1
+              with:
+                  version: v3.20.0
 
     # destroy_infra:
     #     name: Destroy Infra ${{ inputs.arch }}
