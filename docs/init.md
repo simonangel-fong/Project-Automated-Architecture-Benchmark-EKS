@@ -1,10 +1,24 @@
-# Initialize Kubernetes
+# Initialization
 
 [Back](../README.md)
 
 ---
 
-## K8s Cluster
+## AWS Init
+
+```sh
+# #################################
+# init infra
+# #################################
+terraform -chdir=infra/baseline init --backend-config=backend.config
+terraform -chdir=infra/baseline fmt && terraform -chdir=infra/baseline validate
+terraform -chdir=infra/baseline apply -auto-approve
+
+```
+
+---
+
+## EKS Cluster Init
 
 ```sh
 # add kubeconfig
@@ -127,4 +141,13 @@ vi ns.json
 # }
 
 kubectl replace --raw "/api/v1/namespaces/backend/finalize" -f ns.json
+```
+
+---
+
+## Remove
+
+```sh
+kubectl delete -R -f manifest/baseline/
+terraform -chdir=infra/baseline apply -destroy -auto-approve
 ```

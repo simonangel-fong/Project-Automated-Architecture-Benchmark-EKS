@@ -2,14 +2,15 @@
 
 set -Eeuo pipefail
 
-REGION="__REGION__"
-CLUSTER_NAME="__CLUSTER_NAME__"
-VPC_ID="__VPC_ID__"
+REGION="$REGION"
+CLUSTER_NAME="$CLUSTER_NAME"
+VPC_ID="$VPC_ID"
+ARCH="$ARCH"
 
-IAM_ESO_ROLE_ARN="__IAM_ESO_ROLE_ARN__"
-IAM_LBC_ROLE_ARN="__IAM_LBC_ROLE_ARN__"
+IAM_ESO_ROLE_ARN="$IAM_ESO_ROLE_ARN"
+IAM_LBC_ROLE_ARN="$IAM_LBC_ROLE_ARN"
 
-CF_TOKEN="__CF_TOKEN__"
+CF_TOKEN="$CF_TOKEN"
 
 # add kubeconfig
 aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
@@ -31,8 +32,6 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
 # Annotate sa
 kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="$IAM_ESO_ROLE_ARN" --overwrite
 
-kubectl apply -f manifest/baseline
-
 echo
 echo "# #################################"
 echo "# Setup external lbc"
@@ -48,7 +47,7 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
     --set vpcId=$VPC_ID             \
     --set region=$REGION
 
-kubectl annotate -n kube-system sa aws-load-balancer-controller eks.amazonaws.com/role-arn="IAM_LBC_ROLE_ARN" --overwrite
+kubectl annotate -n kube-system sa aws-load-balancer-controller eks.amazonaws.com/role-arn="$IAM_LBC_ROLE_ARN" --overwrite
 
 echo
 echo "# #################################"
@@ -79,5 +78,5 @@ echo "#  Apply Application"
 echo "# #################################"
 echo
 
-kubectl apply -f manifest/baseline/ns.yaml
-kubectl apply -f manifest/baseline/
+kubectl apply -f ./init.yaml
+kubectl apply -f ./$ARCH
