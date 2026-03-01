@@ -44,12 +44,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Configure AWS credentials (OIDC)
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                  role-to-assume: ${{ secrets.aws_tf_role_arn}}
-                  aws-region: ${{ inputs.aws_region }}
-
             - name: Set up kubectl
               uses: azure/setup-kubectl@v3
               with:
@@ -60,10 +54,10 @@ jobs:
                   echo "${{ inputs.project }}-${{ inputs.arch }}"
                   aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
 
-            - name: Install Helm
-              uses: azure/setup-helm@v1
-              with:
-                  version: v3.20.0
+            # - name: Install Helm
+            #   uses: azure/setup-helm@v1
+            #   with:
+            #       version: v3.20.0
 
             - name: Deploy with script
               env:
@@ -81,7 +75,7 @@ jobs:
         timeout-minutes: 60
         env:
             TF_VERSION: 1.14.0
-            TF_DIR: aws/${{ inputs.arch }}
+            TF_DIR: manifest/${{ inputs.arch }}
             TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
             TF_VAR_aws_region: ${{ inputs.AWS_REGION }}
             TF_VAR_env: ${{ inputs.arch }}
