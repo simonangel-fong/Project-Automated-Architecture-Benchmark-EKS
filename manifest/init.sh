@@ -8,23 +8,6 @@ aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
 
 echo
 echo "# #################################"
-echo "# Setup external eso"
-echo "# #################################"
-echo
-
-helm repo add --force-update external-secrets https://charts.external-secrets.io
-helm repo update external-secrets
-helm upgrade --install external-secrets external-secrets/external-secrets \
-    -n external-secrets         \
-    --create-namespace          \
-    --version 2.0.1             \
-    --set installCRDs=true      \
-    --set serviceAccount.create=true    \
-    --set serviceAccount.name=external-secrets      \
-    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
-
-echo
-echo "# #################################"
 echo "# Setup external lbc"
 echo "# #################################"
 echo
@@ -68,6 +51,23 @@ helm upgrade --install external-dns external-dns/external-dns   \
 
 echo
 echo "# #################################"
+echo "# Setup external eso"
+echo "# #################################"
+echo
+
+helm repo add --force-update external-secrets https://charts.external-secrets.io
+helm repo update external-secrets
+helm upgrade --install external-secrets external-secrets/external-secrets \
+    -n external-secrets         \
+    --create-namespace          \
+    --version 2.0.1             \
+    --set installCRDs=true      \
+    --set serviceAccount.create=true    \
+    --set serviceAccount.name=external-secrets      \
+    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
+
+echo
+echo "# #################################"
 echo "#  Apply Application"
 echo "# #################################"
 echo
@@ -78,4 +78,5 @@ kubectl apply -f ./$ARCH/03_external_secrets.yaml
 kubectl apply -f ./$ARCH/04_app_fastapi.yaml
 
 sleep 30
+
 kubectl apply -f ./$ARCH/05_ingress.yaml
