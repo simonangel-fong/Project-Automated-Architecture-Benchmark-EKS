@@ -123,4 +123,18 @@ jobs:
               working-directory: ${{ env.TF_DIR }}
               run: terraform apply -auto-approve -no-color tfplan
 
- 
+            - name: Export Terraform Outputs
+              id: set-outputs
+              working-directory: ${{ env.TF_DIR }}
+              run: |
+                  # Use -raw to ensure no quotes or extra characters are passed
+                  echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
+                  echo "LBC_ARN=$(terraform output -raw iam_role_lbc)" >> $GITHUB_OUTPUT
+    display_outputs:
+        runs-on: ubuntu-latest
+        needs: deploy_infra
+        steps:
+            - name: Echo Terraform Values
+              run: |
+                  echo "The VPC ID is: ${{ needs.deploy_infra.outputs.vpc_id }}"
+                  echo "The LBC IAM Role is: ${{ needs.deploy_infra.outputs.iam_role_lbc }}"

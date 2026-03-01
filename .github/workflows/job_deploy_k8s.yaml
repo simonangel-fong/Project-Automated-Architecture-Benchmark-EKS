@@ -46,6 +46,7 @@ jobs:
             id-token: write # Required for OIDC authentication
         env:
             REGION: ${{ inputs.aws_region }}
+            CLUSTER_NAME: ${{ inputs.project }}-${{ inputs.arch }}
 
         steps:
             - name: Checkout code
