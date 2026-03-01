@@ -1,5 +1,14 @@
 # baseline/aws_eks_lbc.tf
 
+locals {
+  lbc_helm_release        = "aws-load-balancer-controller"
+  lbc_helm_namespace      = "kube-system"
+  lbc_helm_repository     = "https://aws.github.io/eks-charts"
+  lbc_helm_chart          = "aws-load-balancer-controller"
+  lbc_helm_version        = "3.1.0"
+  lbc_helm_serviceaccount = "aws-load-balancer-controller"
+}
+
 # ###################################
 # IAM Role for serviceaccount in eks
 # ###################################
@@ -38,62 +47,36 @@ resource "aws_iam_role_policy_attachment" "lbc" {
 }
 
 # # ###################################
-# # Kubernetes: Create ServiceAccount with Role
-# # ###################################
-# resource "kubernetes_service_account_v1" "lbc" {
-#   metadata {
-#     name      = "aws-load-balancer-controller"
-#     namespace = "kube-system"
-#     annotations = {
-#       "eks.amazonaws.com/role-arn" = aws_iam_role.lbc.arn
-#     }
-#     labels = {
-#       "app.kubernetes.io/name" = "aws-load-balancer-controller"
-#     }
-#   }
-# }
-
-# # ###################################
 # # Helm: Install packages
 # # ###################################
 # resource "helm_release" "lbc" {
-#   name       = "aws-load-balancer-controller"
-#   namespace  = "kube-system"
-#   repository = "https://aws.github.io/eks-charts"
-#   chart      = "aws-load-balancer-controller"
+#   name       = local.lbc_helm_release
+#   namespace  = local.lbc_helm_namespace
+#   repository = local.lbc_helm_repository
+#   chart      = local.lbc_helm_chart
+#   version    = local.lbc_helm_version
 
 #   wait             = true
 #   timeout          = 600
 #   create_namespace = false
 
-#   set = [{
-#     name  = "clusterName"
-#     value = module.eks.cluster_name
-#     },
+#   values = [
+#     yamlencode({
+#       clusterName = module.eks.cluster_name
+#       region      = var.aws_region
+#       vpcId       = module.vpc.vpc_id
 
-#     {
-#       name  = "serviceAccount.create"
-#       value = "false"
-#     },
-
-#     {
-#       name  = "serviceAccount.name"
-#       value = kubernetes_service_account_v1.lbc.metadata[0].name
-#     }
-#     ,
-#     {
-#       name  = "region"
-#       value = var.aws_region
-#     },
-
-#     {
-#       name  = "vpcId"
-#       value = module.vpc.vpc_id
-#     }
+#       serviceAccount = {
+#         create = true
+#         name   = local.lbc_helm_serviceaccount
+#         annotations = {
+#           "eks.amazonaws.com/role-arn" = aws_iam_role.lbc.arn
+#         }
+#       }
+#     })
 #   ]
 
 #   depends_on = [
-#     aws_iam_role_policy_attachment.lbc,
-#     kubernetes_service_account_v1.lbc
+#     aws_iam_role_policy_attachment.lbc
 #   ]
 # }

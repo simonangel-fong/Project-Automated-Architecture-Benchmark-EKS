@@ -48,11 +48,43 @@ module "eks" {
   }
 }
 
-resource "kubernetes_namespace_v1" "app" {
-  metadata {
-    name = var.app_namespace
-    labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
+resource "aws_eks_addon" "cloudwatch_observability" {
+  cluster_name = module.eks.cluster_name
+  addon_name   = "amazon-cloudwatch-observability"
+
+  # Recommended: ensure pod identity agent is present first
+  depends_on = [module.eks]
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  pod_identity_association {
+    role_arn        = aws_iam_role.cw_observability.arn
+    service_account = "cloudwatch-agent"
+  }
+}
+
+data "aws_iam_policy_document" "cw_obs_assume" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession",
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
     }
   }
+}
+
+resource "aws_iam_role" "cw_observability" {
+  name               = "${module.eks.cluster_name}-cw-observability"
+  assume_role_policy = data.aws_iam_policy_document.cw_obs_assume.json
+}
+
+resource "aws_iam_role_policy_attachment" "cw_observability" {
+  role       = aws_iam_role.cw_observability.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }

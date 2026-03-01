@@ -4,6 +4,7 @@
 
 - [Architecture - Baseline](#architecture---baseline)
   - [AWS Init](#aws-init)
+  - [EKS Init](#eks-init)
   - [Remove](#remove)
   - [Test](#test)
 
@@ -19,18 +20,29 @@ terraform -chdir=infra/baseline init --backend-config=backend.config
 terraform -chdir=infra/baseline fmt && terraform -chdir=infra/baseline validate
 terraform -chdir=infra/baseline apply -auto-approve
 
+```
+
+---
+
+## EKS Init
+
+```sh
 # #################################
 # init k8s
 # #################################
 # add kubeconfig
 aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 
-# creat secret
-kubectl apply -f manifest/baseline/eso/external-secret.yaml
-
 # deploy app
-kubectl apply -f manifest/baseline/backend/fastapi.yaml
+kubectl apply -f manifest/baseline/backend/
 
+# #################################
+# init db
+# #################################
+kubectl replace --force -f manifest/job/flyway.yaml
+# job.batch/init-db-flyway replaced
+
+kubectl get -n backend job.batch/init-db-flyway 
 ```
 
 ---

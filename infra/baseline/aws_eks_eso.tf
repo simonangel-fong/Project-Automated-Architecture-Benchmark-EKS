@@ -1,9 +1,12 @@
 # baseline/aws_eks_eso.tf
 
 locals {
-  eso_namespace            = "external-secrets"
-  eso_serviceaccount       = "external-secrets"
   eso_helm_release         = "external-secrets"
+  eso_helm_namespace       = "external-secrets"
+  eso_helm_repository      = "https://charts.external-secrets.io"
+  eso_helm_chart           = "external-secrets"
+  eso_helm_version         = "2.0.1"
+  eso_helm_serviceaccount  = "external-secrets"
   eso_cluster_secret_store = "aws-secrets-global"
 }
 
@@ -69,65 +72,29 @@ resource "aws_iam_role_policy_attachment" "eso" {
 }
 
 # # ###################################
-# # Kubernetes resources
+# # Helm: Install packages
 # # ###################################
-# # Create ns for eso
-# resource "kubernetes_namespace_v1" "eso" {
-#   metadata {
-#     name = "external-secrets"
-#     labels = {
-#       "app.kubernetes.io/managed-by" = "terraform"
-#     }
-#   }
+# # AWS External Secrets
+# resource "helm_release" "eso" {
+#   name             = local.eso_helm_release
+#   namespace        = local.eso_helm_namespace
+#   repository       = local.eso_helm_repository
+#   chart            = local.eso_helm_chart
+#   version          = local.eso_helm_version
+#   create_namespace = true
+
+#   values = [
+#     yamlencode({
+#       installCRDs = true
+#       serviceAccount = {
+#         create = true
+#         name   = local.eso_helm_serviceaccount
+#         annotations = {
+#           "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
+#         }
+#       }
+#     })
+#   ]
+
+#   depends_on = [aws_iam_role_policy_attachment.eso]
 # }
-
-# ###################################
-# Helm: Install packages
-# ###################################
-# AWS External Secrets
-resource "helm_release" "external_secrets" {
-  name             = local.eso_helm_release
-  namespace        = local.eso_namespace
-  repository       = "https://charts.external-secrets.io"
-  chart            = "external-secrets"
-  version          = "2.0.1"
-  create_namespace = true
-
-  values = [
-    yamlencode({
-      serviceAccount = {
-        create = true
-        name   = local.eso_serviceaccount
-        annotations = {
-          "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
-        }
-      }
-    })
-  ]
-}
-
-resource "kubernetes_manifest" "eso" {
-  manifest = {
-    apiVersion = "external-secrets.io/v1"
-    kind       = "ClusterSecretStore"
-    metadata = {
-      name = local.eso_cluster_secret_store
-    }
-    spec = {
-      provider = {
-        aws = {
-          service = "SecretsManager"
-          region  = var.aws_region
-          auth = {
-            jwt = {
-              serviceAccountRef = {
-                name      = local.eso_serviceaccount
-                namespace = local.eso_namespace
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}

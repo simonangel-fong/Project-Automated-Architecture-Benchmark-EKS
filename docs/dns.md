@@ -26,11 +26,32 @@ helm upgrade --install external-dns external-dns/external-dns -n external-dns --
 
 # apply app with ingress
 kubectl apply -f manifest/baseline
+```
 
+- Test
+
+```sh
 # test
 curl https://eks-benchmark-baseline.arguswatcher.net/
 
-curl -v https://eks-benchmark-baseline-1698995919.ca-central-1.elb.amazonaws.com/ -H "eks-benchmark-baseline.arguswatcher.net"
+curl -v "http://eks-benchmark-baseline-570625218.ca-central-1.elb.amazonaws.com/api/health" -H "Host: eks-benchmark-baseline.arguswatcher.net"
+# * Host eks-benchmark-baseline-570625218.ca-central-1.elb.amazonaws.com:80 was resolved.
+# * IPv6: (none)
+# * IPv4: 52.60.112.91, 16.52.14.127, 15.222.66.53
+# *   Trying 52.60.112.91:80...
+# * Connected to eks-benchmark-baseline-570625218.ca-central-1.elb.amazonaws.com (52.60.112.91) port 80
+# > GET /api/health HTTP/1.1
+# > Host: eks-benchmark-baseline.arguswatcher.net
+# > User-Agent: curl/8.5.0
+# > Accept: */*
+# >
+# < HTTP/1.1 301 Moved Permanently
+# < Server: awselb/2.0
+# < Date: Sat, 28 Feb 2026 23:39:58 GMT
+# < Content-Type: text/html
+# < Content-Length: 134
+# < Connection: keep-alive
+# < Location: https://eks-benchmark-baseline.arguswatcher.net:443/api/health
 
 curl http://eks-benchmark-baseline.arguswatcher.net/api/
 ```

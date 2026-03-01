@@ -17,14 +17,14 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-path: /api/health
     alb.ingress.kubernetes.io/success-codes: "200"
     # ExternalDNS 
-    external-dns.alpha.kubernetes.io/hostname: benchmark-eks-baseline.arguswatcher.net
+    external-dns.alpha.kubernetes.io/hostname: eks-benchmark-baseline.arguswatcher.net
     external-dns.alpha.kubernetes.io/ttl: "120"
     # tag
     alb.ingress.kubernetes.io/tags: Project=benchmark,Architecture=baseline,ManagedBy=kubernetes
 spec:
   ingressClassName: alb
   rules:
-    - host: benchmark-eks-baseline.arguswatcher.net
+    - host: eks-benchmark-baseline.arguswatcher.net
       http:
         paths:
           - path: /api

@@ -43,7 +43,7 @@ variable "cloudflare_zone_id" { type = string }
 # ##############################
 variable "kube_version" {
   type    = string
-  default = "1.34"
+  default = "1.35"
 }
 
 variable "node_instance_types" {

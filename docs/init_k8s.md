@@ -31,7 +31,7 @@ helm upgrade --install external-secrets external-secrets/external-secrets -n ext
 kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="IAM_ESO_ROLE_ARN" --overwrite
 # serviceaccount/external-secrets annotated
 
-kubectl apply -f manifest/eso/external-secret.yaml
+kubectl apply -f manifest/baseline/external-secret.yaml
 # clustersecretstore.external-secrets.io/aws-secrets-global created
 # externalsecret.external-secrets.io/app-cred created
 
@@ -65,6 +65,7 @@ helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
 helm repo update
 helm upgrade --install external-dns external-dns/external-dns -n external-dns --create-namespace --values manifest/helm/values-dns.yaml
 ```
+
 ---
 
 ## Deploy Application
@@ -102,4 +103,21 @@ kubectl -n backend logs -l job-name=init-db-flyway -f
 kubectl -n backend get jobs
 # NAME             STATUS     COMPLETIONS   DURATION   AGE
 # init-db-flyway   Complete   1/1           27s        115s
+```
+
+---
+
+## Debug
+
+- remove ns
+
+```sh
+kubectl get ns backend -o json > ns.json
+
+vi ns.json
+# "spec": {
+#   "finalizers": []
+# }
+
+kubectl replace --raw "/api/v1/namespaces/backend/finalize" -f ns.json
 ```
