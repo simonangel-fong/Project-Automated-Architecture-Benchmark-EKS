@@ -1,0 +1,69 @@
+# .github/workflows/job_deploy.yaml
+name: Job-Deploy Resources
+
+on:
+    workflow_call:
+        inputs:
+            project:
+                description: "Project name"
+                required: true
+                type: string
+            arch:
+                description: "Architecture"
+                required: true
+                type: string
+            aws_region:
+                description: "AWS region"
+                type: string
+                default: "ca-central-1"
+        secrets:
+            db_name:
+                description: "Database name"
+            db_username:
+                description: "Database username"
+            db_password:
+                description: "Database password"
+            db_app_pwd:
+                description: "App user password"
+            db_readonly_pwd:
+                description: "Readonly user password"
+            cf_api_token:
+                description: "Cloudflare API token"
+            cf_zone_id:
+                description: "Cloudflare zone id"
+            aws_tf_role_arn:
+                description: "AWS role for tf"
+            aws_backend_bucket:
+                description: "AWS bucket for tf remote backend"
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write # Required for OIDC authentication
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials (OIDC)
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.aws_tf_role_arn}}
+                  aws-region: ${{ inputs.aws_region }}
+
+            - name: Set up kubectl
+              uses: azure/setup-kubectl@v3
+              with:
+                  version: "v1.34.0"
+
+            - name: Update kubeconfig
+              run: |
+                echo "${{ inputs.project }}-${{ inputs.arch }}"
+                aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
+
+            # - name: Deploy to cluster
+            #   run: |
+            #       kubectl apply -f k8s/ # Apply all manifests in the k8s directory
+            #       kubectl rollout status deployment/<YOUR_DEPLOYMENT_NAME> -n <YOUR_NAMESPACE> --timeout=600s

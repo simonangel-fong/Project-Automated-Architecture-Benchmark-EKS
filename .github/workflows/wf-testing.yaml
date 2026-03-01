@@ -16,7 +16,7 @@ concurrency:
 jobs:
   deploy_infra:
     name: Deploy Resources
-    uses: ./.github/workflows/job_deploy.yaml
+    uses: ./.github/workflows/job_deploy_infra.yaml
     permissions:
       contents: read
       id-token: write # OIDC
@@ -43,6 +43,24 @@ jobs:
       aws_tf_role_arn: ${{ secrets.AWS_TF_ROLE_ARN }}
       aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
 
+  deploy_k8s:
+    name: Deploy Resources
+    uses: ./.github/workflows/job_deploy_k8s.yaml
+    permissions:
+      contents: read
+      id-token: write # OIDC
+    strategy:
+      fail-fast: false
+      matrix:
+        solution:
+          - arch: baseline
+    with:
+      project: ${{ vars.PROJECT}}
+      arch: ${{ matrix.solution.arch }}
+      aws_region: ${{ vars.AWS_REGION }}
+
+
+      
   # smoke_testing:
   #   name: Smoke Testing
   #   needs: deploy
