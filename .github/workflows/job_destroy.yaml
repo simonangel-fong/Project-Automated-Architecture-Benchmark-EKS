@@ -65,6 +65,10 @@ jobs:
               with:
                   version: v3.20.0
 
+            - name: Deploy with script
+              run: |
+                  bash manifest/destroy.sh
+
     # destroy_infra:
     #     name: Destroy Infra ${{ inputs.arch }}
     #     needs: 
