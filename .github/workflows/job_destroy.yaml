@@ -153,4 +153,4 @@ jobs:
 
             - name: Destroy - Terraform Apply
               working-directory: ${{ env.TF_DIR }}
-              run: terraform apply tfplan-destroy -auto-approve -no-color 
+              run: terraform apply -destroy -auto-approve -no-color 
