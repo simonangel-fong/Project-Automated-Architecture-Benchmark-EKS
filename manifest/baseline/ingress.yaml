@@ -15,7 +15,7 @@ metadata:
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     # Health check
     alb.ingress.kubernetes.io/healthcheck-path: /api/health
-    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/success-codes: "200-399"
     # ExternalDNS 
     external-dns.alpha.kubernetes.io/hostname: eks-benchmark-baseline.arguswatcher.net
     external-dns.alpha.kubernetes.io/ttl: "120"

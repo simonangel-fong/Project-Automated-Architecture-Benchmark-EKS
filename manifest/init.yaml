@@ -1,4 +1,10 @@
 # baseline/backend/external-secret.yaml
+# namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
+---
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:

@@ -47,23 +47,39 @@ module "eks" {
     }
   }
 }
-
 resource "aws_eks_addon" "cloudwatch_observability" {
   cluster_name = module.eks.cluster_name
   addon_name   = "amazon-cloudwatch-observability"
 
-  # Recommended: ensure pod identity agent is present first
   depends_on = [module.eks]
 
   resolve_conflicts_on_create = "OVERWRITE"
-  resolve_conflicts_on_update = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
+
+  configuration_values = jsonencode({
+    agent = {
+      config = {
+        logs = {
+          metrics_collected = {
+            kubernetes = {
+              enhanced_container_insights = true
+            }
+          }
+        }
+      }
+    }
+  })
 
   pod_identity_association {
     role_arn        = aws_iam_role.cw_observability.arn
     service_account = "cloudwatch-agent"
   }
+
 }
 
+# #########################
+# IAM Role for CloudWatch Observability (Pod Identity)
+# #########################
 data "aws_iam_policy_document" "cw_obs_assume" {
   statement {
     effect = "Allow"
@@ -81,10 +97,16 @@ data "aws_iam_policy_document" "cw_obs_assume" {
 
 resource "aws_iam_role" "cw_observability" {
   name               = "${module.eks.cluster_name}-cw-observability"
+  description        = "Pod Identity role for CloudWatch Observability addon on ${module.eks.cluster_name}"
   assume_role_policy = data.aws_iam_policy_document.cw_obs_assume.json
 }
 
-resource "aws_iam_role_policy_attachment" "cw_observability" {
+resource "aws_iam_role_policy_attachment" "cw_observability_cloudwatch" {
   role       = aws_iam_role.cw_observability.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "cw_observability_xray" {
+  role       = aws_iam_role.cw_observability.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ef
+set -Eeuo pipefail
 
 REGION="__REGION__"
 CLUSTER_NAME="__CLUSTER_NAME__"
@@ -70,7 +70,8 @@ helm upgrade --install external-dns external-dns/external-dns \
     --set domainFilters[0]=arguswatcher.net \
     --set env[0].name=CF_API_TOKEN \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key \
-    --set env[0].valueFrom.secretKeyRef.key=apiKey
+    --set env[0].valueFrom.secretKeyRef.key=apiKey  \
+    --set cloudflare.proxied=true
 
 echo
 echo "# #################################"

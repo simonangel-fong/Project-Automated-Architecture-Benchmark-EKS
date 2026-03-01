@@ -80,7 +80,7 @@ bash infra/script/init.sh
 # #################################
 # Apply Application
 # #################################
-kubectl apply -f manifest/baseline/ns.yaml
+kubectl apply -f manifest/init.yaml
 kubectl apply -f manifest/baseline/
 
 # confirm
