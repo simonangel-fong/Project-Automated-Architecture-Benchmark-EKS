@@ -77,5 +77,5 @@ kubectl apply -f ./$ARCH/02_cluste_secret_store.yaml
 kubectl apply -f ./$ARCH/03_external_secrets.yaml
 kubectl apply -f ./$ARCH/04_app_fastapi.yaml
 
-sleep(30)
+sleep 30s
 kubectl apply -f ./$ARCH/05_ingress.yaml
