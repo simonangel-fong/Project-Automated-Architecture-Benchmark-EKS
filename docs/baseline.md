@@ -34,7 +34,7 @@ terraform -chdir=infra/baseline apply -auto-approve
 aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 
 # deploy app
-kubectl apply -f manifest/baseline/backend/
+kubectl apply -f manifest/baseline/
 
 # #################################
 # init db

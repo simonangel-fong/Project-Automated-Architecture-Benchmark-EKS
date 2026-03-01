@@ -66,6 +66,12 @@ helm repo update
 helm upgrade --install external-dns external-dns/external-dns -n external-dns --create-namespace --values manifest/helm/values-dns.yaml
 ```
 
+- Shell script
+
+```sh
+bash infra/script/init.sh
+```
+
 ---
 
 ## Deploy Application
@@ -74,7 +80,8 @@ helm upgrade --install external-dns external-dns/external-dns -n external-dns --
 # #################################
 # Apply Application
 # #################################
-kubectl apply -f manifest/baseline/backend
+kubectl apply -f manifest/baseline/ns.yaml
+kubectl apply -f manifest/baseline/
 
 # confirm
 kubectl -n backend get po
