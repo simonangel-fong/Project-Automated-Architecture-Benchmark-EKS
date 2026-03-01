@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: init-db-flyway
-  namespace: backend
+  namespace: job
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 3600   # auto-cleanup after 1 hour
