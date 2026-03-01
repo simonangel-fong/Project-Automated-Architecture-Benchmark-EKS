@@ -52,15 +52,14 @@ kubectl apply -f manifest/baseline/external-secret.yaml
 # #################################
 # Setup external lbc
 # #################################
-helm repo add --force-update eks https://aws.github.io/eks-charts 
+helm repo add eks --force-update https://aws.github.io/eks-charts
 helm repo update
-
-# helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --version "3.1.0" --values manifest/helm/values-lbc.yaml
 helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
     -n kube-system \
-    --set clusterName=$CLUSTER_NAME \
-    --set serviceAccount.create=true \
-    --set serviceAccount.name=aws-load-balancer-controller \
+    --set clusterName=$CLUSTER_NAME     \
+    --set vpcId=$VPC_ID                 \
+    --set serviceAccount.create=true    \
+    --set serviceAccount.name=aws-load-balancer-controller      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN
 
 # Release "aws-load-balancer-controller" does not exist. Installing it now.
@@ -81,7 +80,17 @@ kubectl -n external-dns create secret generic cloudflare-api-key --from-literal=
 
 helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
 helm repo update
-helm upgrade --install external-dns external-dns/external-dns -n external-dns --create-namespace --values manifest/helm/values-dns.yaml
+helm upgrade --install external-dns external-dns/external-dns   \
+    -n external-dns     \
+    --create-namespace  \
+    --set provider.name=cloudflare  \
+    --set sources[0]=ingress        \
+    --set policy=sync   \
+    --set registry=txt  \
+    --set domainFilters[0]=arguswatcher.net     \
+    --set env[0].name=CF_API_TOKEN  \
+    --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
+    --set env[0].valueFrom.secretKeyRef.key=apiKey
 ```
 
 - Shell script

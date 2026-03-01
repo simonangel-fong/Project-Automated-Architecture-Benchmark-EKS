@@ -18,10 +18,10 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
     -n external-secrets         \
     --create-namespace          \
     --version 2.0.1             \
-    --set installCRDs=true
-
-# Annotate sa
-kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="$IAM_ESO_ROLE_ARN" --overwrite
+    --set installCRDs=true      \
+    --set serviceAccount.create=true    \
+    --set serviceAccount.name=external-secrets      \
+    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
 
 echo
 echo "# #################################"
@@ -72,7 +72,8 @@ echo "#  Apply Application"
 echo "# #################################"
 echo
 
-kubectl apply -f ./$ARCH/ns.yaml
-kubectl apply -f ./$ARCH/external-secrets.yaml
-kubectl apply -f ./$ARCH/fastapi.yaml
-kubectl apply -f ./$ARCH/ingress.yaml
+kubectl apply -f ./$ARCH/01_ns.yaml
+kubectl apply -f ./$ARCH/02_cluste_secret_store.yaml
+kubectl apply -f ./$ARCH/03_external_secrets.yaml
+kubectl apply -f ./$ARCH/04_app_fastapi.yaml
+kubectl apply -f ./$ARCH/05_ingress.yaml
