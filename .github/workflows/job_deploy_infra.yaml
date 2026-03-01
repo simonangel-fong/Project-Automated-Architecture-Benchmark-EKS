@@ -151,6 +151,7 @@ jobs:
             IAM_ESO_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_eso }}
             VPC_ID: ${{ needs.deploy_infra.outputs.vpc_id }}
             CF_TOKEN: ${{ secrets.cf_api_token }}
+            ARCH: ${{ inputs.arch }}
 
         steps:
             - name: Checkout code
