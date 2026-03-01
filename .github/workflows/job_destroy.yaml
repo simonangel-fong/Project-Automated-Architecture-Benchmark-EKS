@@ -69,6 +69,7 @@ jobs:
               env:
                   REGION: ${{ inputs.aws_region }}
                   CLUSTER_NAME: ${{ inputs.project }}-${{ inputs.arch }}
+                  ARCH: ${{ inputs.arch }}
               run: |
                   bash manifest/destroy.sh
 
