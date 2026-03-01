@@ -1,3 +1,5 @@
+# manifest/init.sh
+
 #!/bin/bash
 
 set -Eeuo pipefail
@@ -55,7 +57,10 @@ echo "# Setup external dns"
 echo "# #################################"
 echo
 
-kubectl -n external-dns create secret generic cloudflare-api-key --from-literal=apiKey=$CF_TOKEN
+# create secret for cf
+kubectl -n external-dns create secret generic cloudflare-api-key \
+  ---from-literal=apiKey=$CF_TOKEN \
+  --dry-run=client -o yaml | kubectl apply -f -
 
 helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
 helm repo update

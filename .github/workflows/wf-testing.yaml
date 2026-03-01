@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true # Cancel older runs
 
 jobs:
-  deploy:
+  deploy_infra:
     name: Deploy Resources
     uses: ./.github/workflows/job_deploy.yaml
     permissions:
