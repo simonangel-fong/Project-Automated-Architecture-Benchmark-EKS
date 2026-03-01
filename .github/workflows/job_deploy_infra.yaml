@@ -181,7 +181,7 @@ jobs:
             - name: Deploy with scritp
               run: |
                   bash manifest/init.sh
-            
+
             - name: Initial RDS
               run: |
-                kubectl apply -f manifest/job/flyway.yaml
+                  kubectl apply -f manifest/job/flyway.yaml
