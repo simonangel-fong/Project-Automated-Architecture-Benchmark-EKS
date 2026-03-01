@@ -28,7 +28,7 @@ aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 # #################################
 # Setup external eso
 # #################################
-helm repo add external-secrets https://charts.external-secrets.io
+helm repo add --force-update external-secrets https://charts.external-secrets.io
 helm repo update external-secrets
 helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets --version 2.0.1 --create-namespace --set installCRDs=true
 # Release "external-secrets" does not exist. Installing it now.
@@ -52,10 +52,17 @@ kubectl apply -f manifest/baseline/external-secret.yaml
 # #################################
 # Setup external lbc
 # #################################
-helm repo add eks https://aws.github.io/eks-charts
+helm repo add --force-update eks https://aws.github.io/eks-charts 
 helm repo update
 
-helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --version "3.1.0" --values helm/values-lbc.yaml
+# helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --version "3.1.0" --values manifest/helm/values-lbc.yaml
+helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    -n kube-system \
+    --set clusterName=$CLUSTER_NAME \
+    --set serviceAccount.create=true \
+    --set serviceAccount.name=aws-load-balancer-controller \
+    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN
+
 # Release "aws-load-balancer-controller" does not exist. Installing it now.
 # NAME: aws-load-balancer-controller
 # LAST DEPLOYED: Sat Feb 28 13:53:00 2026
@@ -66,9 +73,6 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
 # TEST SUITE: None
 # NOTES:
 # AWS Load Balancer controller installed!
-
-kubectl annotate -n kube-system sa aws-load-balancer-controller eks.amazonaws.com/role-arn="IAM_LBC_ROLE_ARN" --overwrite
-# serviceaccount/aws-load-balancer-controller annotated
 
 # #################################
 # Setup external dns
@@ -141,6 +145,7 @@ vi ns.json
 # }
 
 kubectl replace --raw "/api/v1/namespaces/backend/finalize" -f ns.json
+kubectl patch ingress nginx-alb -n backend -p '{"metadata":{"finalizers":null}}'
 ```
 
 ---
