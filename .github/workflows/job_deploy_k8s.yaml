@@ -44,6 +44,8 @@ jobs:
         permissions:
             contents: read
             id-token: write # Required for OIDC authentication
+        env:
+            REGION: ${{ inputs.aws_region }}
 
         steps:
             - name: Checkout code
