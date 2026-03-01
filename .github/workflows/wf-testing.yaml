@@ -14,34 +14,34 @@ concurrency:
   cancel-in-progress: true # Cancel older runs
 
 jobs:
-  deploy_infra:
-    name: Deploy Resources
-    uses: ./.github/workflows/job_deploy_infra.yaml
-    permissions:
-      contents: read
-      id-token: write # OIDC
-    strategy:
-      fail-fast: false
-      matrix:
-        solution:
-          - arch: baseline
-          # - arch: scale
-          # - arch: redis
-          # - arch: kafka
-    with:
-      project: ${{ vars.PROJECT}}
-      arch: ${{ matrix.solution.arch }}
-      aws_region: ${{ vars.AWS_REGION }}
-    secrets:
-      db_name: ${{ secrets.DB_NAME }}
-      db_username: ${{ secrets.DB_USERNAME }}
-      db_password: ${{ secrets.DB_PASSWORD }}
-      db_app_pwd: ${{ secrets.DB_APP_PWD }}
-      db_readonly_pwd: ${{ secrets.DB_READONLY_PWD }}
-      cf_api_token: ${{ secrets.CF_API_TOKEN }}
-      cf_zone_id: ${{ secrets.CF_ZONE_ID }}
-      aws_tf_role_arn: ${{ secrets.AWS_TF_ROLE_ARN }}
-      aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
+  # deploy_infra:
+  #   name: Deploy Resources
+  #   uses: ./.github/workflows/job_deploy_infra.yaml
+  #   permissions:
+  #     contents: read
+  #     id-token: write # OIDC
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       solution:
+  #         - arch: baseline
+  #         # - arch: scale
+  #         # - arch: redis
+  #         # - arch: kafka
+  #   with:
+  #     project: ${{ vars.PROJECT}}
+  #     arch: ${{ matrix.solution.arch }}
+  #     aws_region: ${{ vars.AWS_REGION }}
+  #   secrets:
+  #     db_name: ${{ secrets.DB_NAME }}
+  #     db_username: ${{ secrets.DB_USERNAME }}
+  #     db_password: ${{ secrets.DB_PASSWORD }}
+  #     db_app_pwd: ${{ secrets.DB_APP_PWD }}
+  #     db_readonly_pwd: ${{ secrets.DB_READONLY_PWD }}
+  #     cf_api_token: ${{ secrets.CF_API_TOKEN }}
+  #     cf_zone_id: ${{ secrets.CF_ZONE_ID }}
+  #     aws_tf_role_arn: ${{ secrets.AWS_TF_ROLE_ARN }}
+  #     aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
 
   deploy_k8s:
     name: Deploy Resources
@@ -60,7 +60,7 @@ jobs:
       aws_region: ${{ vars.AWS_REGION }}
 
 
-      
+
   # smoke_testing:
   #   name: Smoke Testing
   #   needs: deploy
