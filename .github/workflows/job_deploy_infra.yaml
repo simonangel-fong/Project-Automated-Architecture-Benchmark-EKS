@@ -150,6 +150,7 @@ jobs:
             IAM_LBC_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_lbc }}
             IAM_ESO_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_eso }}
             VPC_ID: ${{ needs.deploy_infra.outputs.vpc_id }}
+            CF_TOKEN: ${{ secrets.cf_api_token }}
 
         steps:
             - name: Checkout code
