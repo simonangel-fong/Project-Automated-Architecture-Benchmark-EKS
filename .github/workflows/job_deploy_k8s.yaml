@@ -62,10 +62,14 @@ jobs:
 
             - name: Update kubeconfig
               run: |
-                echo "${{ inputs.project }}-${{ inputs.arch }}"
-                aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
+                  echo "${{ inputs.project }}-${{ inputs.arch }}"
+                  aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
 
-            # - name: Deploy to cluster
-            #   run: |
-            #       kubectl apply -f k8s/ # Apply all manifests in the k8s directory
-            #       kubectl rollout status deployment/<YOUR_DEPLOYMENT_NAME> -n <YOUR_NAMESPACE> --timeout=600s
+            - name: Install Helm
+              uses: azure/setup-helm@v1
+              with:
+                  version: v3.20.0
+
+            - name: Deploy with scritp
+              run: |
+                  bash manifest/init.sh
