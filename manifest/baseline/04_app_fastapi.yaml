@@ -160,18 +160,6 @@ spec:
       targetPort: http
   type: ClusterIP
 ---
-# pod budge
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: fastapi-pdb
-  namespace: backend
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: fastapi
----
 # hpa
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
