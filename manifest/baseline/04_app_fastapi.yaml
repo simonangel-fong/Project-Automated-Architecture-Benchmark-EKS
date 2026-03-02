@@ -54,12 +54,12 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: fastapi
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            capabilities:
-              drop: ["ALL"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
       containers:
         - name: fastapi
           image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:fastapi-baseline
