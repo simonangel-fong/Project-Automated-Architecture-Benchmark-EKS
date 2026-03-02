@@ -23,7 +23,7 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN   \
     --wait --timeout 10m
 
-sleep 10
+sleep 15
 
 echo
 echo "# #################################"
@@ -52,6 +52,8 @@ helm upgrade --install external-dns external-dns/external-dns   \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
     --set env[0].valueFrom.secretKeyRef.key=apiKey
 
+sleep 15
+
 echo
 echo "# #################################"
 echo "# Setup external eso"
@@ -68,6 +70,8 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
     --set serviceAccount.create=true    \
     --set serviceAccount.name=external-secrets      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
+
+sleep 15
 
 echo
 echo "# #################################"
