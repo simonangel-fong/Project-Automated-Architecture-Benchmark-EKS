@@ -83,7 +83,7 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
     --set serviceAccount.name=external-secrets      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
 
-sleep 15
+sleep 10
 
 echo
 echo "# #################################"
@@ -95,7 +95,4 @@ kubectl apply -f manifest/$ARCH/01_ns.yaml
 kubectl apply -f manifest/$ARCH/02_cluste_secret_store.yaml
 kubectl apply -f manifest/$ARCH/03_external_secrets.yaml
 kubectl apply -f manifest/$ARCH/04_app_fastapi.yaml
-
-sleep 30
-
 kubectl apply -f manifest/$ARCH/05_ingress.yaml
