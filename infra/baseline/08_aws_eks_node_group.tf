@@ -19,6 +19,10 @@ resource "aws_eks_node_group" "default" {
     min_size     = var.min_size
   }
 
+  update_config {
+    max_unavailable = 1
+  }
+
   lifecycle {
     ignore_changes = [scaling_config[0].desired_size]
   }

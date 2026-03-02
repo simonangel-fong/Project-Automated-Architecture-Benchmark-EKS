@@ -1,18 +1,47 @@
-# baseline/aws_eks_eso.tf
+# aws_eks_cluster_iam.tf
 
-locals {
-  eso_helm_release         = "external-secrets"
-  eso_helm_namespace       = "external-secrets"
-  eso_helm_repository      = "https://charts.external-secrets.io"
-  eso_helm_chart           = "external-secrets"
-  eso_helm_version         = "2.0.1"
-  eso_helm_serviceaccount  = "external-secrets"
-  eso_cluster_secret_store = "aws-secrets-global"
+# #############################################
+# IAM Role: SA for AWS Load Balancer Controller
+# #############################################
+# role of Load Balancer Controller
+resource "aws_iam_role" "lbc" {
+  name = "${module.eks.cluster_name}-lbc"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        # Federated = local.oidc_provider_arn
+        Federated = module.eks.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${local.oidc_provider}:aud" = "sts.amazonaws.com"
+          "${local.oidc_provider}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        }
+      }
+    }]
+  })
 }
 
-# ###################################
-# IAM Role for serviceaccount in eks
-# ###################################
+# policy for LBC
+resource "aws_iam_policy" "lbc" {
+  name   = "${module.eks.cluster_name}-lbc"
+  policy = file("${path.module}/../share/iam_policy.json")
+}
+
+resource "aws_iam_role_policy_attachment" "lbc" {
+  role       = aws_iam_role.lbc.name
+  policy_arn = aws_iam_policy.lbc.arn
+}
+
+
+
+# #############################################
+# IAM Role: SA for ESO
+# #############################################
 # role of External Secrets Operator
 resource "aws_iam_role" "eso" {
   name = "${module.eks.cluster_name}-eso"
@@ -71,30 +100,3 @@ resource "aws_iam_role_policy_attachment" "eso" {
   policy_arn = aws_iam_policy.eso.arn
 }
 
-# # ###################################
-# # Helm: Install packages
-# # ###################################
-# # AWS External Secrets
-# resource "helm_release" "eso" {
-#   name             = local.eso_helm_release
-#   namespace        = local.eso_helm_namespace
-#   repository       = local.eso_helm_repository
-#   chart            = local.eso_helm_chart
-#   version          = local.eso_helm_version
-#   create_namespace = true
-
-#   values = [
-#     yamlencode({
-#       installCRDs = true
-#       serviceAccount = {
-#         create = true
-#         name   = local.eso_helm_serviceaccount
-#         annotations = {
-#           "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
-#         }
-#       }
-#     })
-#   ]
-
-#   depends_on = [aws_iam_role_policy_attachment.eso]
-# }

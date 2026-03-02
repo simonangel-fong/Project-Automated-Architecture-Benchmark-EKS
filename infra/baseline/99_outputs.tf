@@ -21,5 +21,4 @@ output "iam_role_lbc" {
 
 output "eks_kubeconfig_command" {
   value = "\naws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}\n"
-
 }

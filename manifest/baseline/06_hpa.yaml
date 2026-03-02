@@ -11,6 +11,7 @@ spec:
     kind: Deployment
     name: fastapi
   minReplicas: 1
+  # minReplicas: 4
   maxReplicas: 10
   metrics:
     - type: Resource
