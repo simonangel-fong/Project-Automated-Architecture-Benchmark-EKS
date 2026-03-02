@@ -20,8 +20,8 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
     --set vpcId=$VPC_ID                 \
     --set serviceAccount.create=true    \
     --set serviceAccount.name=aws-load-balancer-controller      \
-    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN
-
+    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN   \
+    --wait --timeout 10m
 echo
 echo "# #################################"
 echo "# Setup external dns"
