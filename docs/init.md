@@ -165,3 +165,18 @@ kubectl patch ingress nginx-alb -n backend -p '{"metadata":{"finalizers":null}}'
 kubectl delete -R -f manifest/baseline/
 terraform -chdir=infra/baseline apply -destroy -auto-approve
 ```
+
+---
+
+## Access Control
+
+| Identity               | Purpose                                   | EKS Access Policy             | K8s Permission Level                                                                  |
+| ---------------------- | ----------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------- |
+| Infra-Provisioner-Role | "Terraform: EKS, VPC, AWS Add-ons."       | `AmazonEKSClusterAdminPolicy` | Full Admin: Needs to manage cluster-wide system settings and AWS integrations.        |
+| App-Deployer-Role      | Helm: App-specific add-ons and manifests. | `AmazonEKSAdminPolicy`        | "Resource Admin: High-level access to create Namespaces, CRDs, and deploy workloads." |
+
+| Persona   | Purpose                            | EKS Access Policy             | Scope                                                  |
+| --------- | ---------------------------------- | ----------------------------- | ------------------------------------------------------ |
+| Admin     | Daily Ops / Emergency Break-Glass. | `AmazonEKSClusterAdminPolicy` | Cluster-wide: Full visibility and control.             |
+| Developer | App debugging and log viewing.     | `AmazonEKSEditPolicy`         | Namespace-bound: Restricted to app-\* namespaces only. |
+| Auditor   | Compliance & Reporting.            | `AmazonEKSViewPolicy`         | Cluster-wide: Read-only (GET/LIST). No write/delete.   |

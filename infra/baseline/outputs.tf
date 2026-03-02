@@ -19,7 +19,7 @@ output "iam_role_lbc" {
   value = aws_iam_role.lbc.arn
 }
 
-# output "eks_kubeconfig_command" {
-#   value = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}"
+output "eks_kubeconfig_command" {
+  value = "\naws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}\n"
 
-# }
+}

@@ -32,6 +32,11 @@ variable "tags" {
 # current identity
 data "aws_caller_identity" "current" {}
 
+variable "cluster_admin_id" {
+  description = "AWS id for eks cluster admin access."
+  type        = string
+}
+
 # ##############################
 # Cloudflare
 # ##############################
