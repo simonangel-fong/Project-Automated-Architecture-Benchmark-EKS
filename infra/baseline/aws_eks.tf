@@ -110,3 +110,10 @@ resource "aws_iam_role_policy_attachment" "cw_observability_xray" {
   role       = aws_iam_role.cw_observability.name
   policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 }
+
+resource "aws_eks_addon" "metrics_server" {
+  cluster_name                = module.eks.cluster_name
+  addon_name                  = "metrics-server"
+  addon_version               = "v0.8.1-eksbuild.1"
+  resolve_conflicts_on_update = "OVERWRITE"
+}

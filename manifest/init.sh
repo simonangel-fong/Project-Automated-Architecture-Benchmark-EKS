@@ -83,7 +83,15 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
     --set serviceAccount.name=external-secrets      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
 
-sleep 10
+echo
+echo "# #################################"
+echo "# Setup metric server"
+echo "# #################################"
+echo
+
+helm repo add --force-update metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm repo update
+helm upgrade --install metrics-server metrics-server/metrics-server
 
 echo
 echo "# #################################"

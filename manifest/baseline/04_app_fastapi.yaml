@@ -26,7 +26,7 @@ metadata:
     app.kubernetes.io/part-of: eks-benchmark
     app.kubernetes.io/component: api
 spec:
-  replicas: 4
+  replicas: 1
   revisionHistoryLimit: 5
   minReadySeconds: 5
   strategy:
@@ -63,13 +63,6 @@ spec:
             - name: http
               containerPort: 8000
               protocol: TCP
-
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            capabilities:
-              drop: ["ALL"]
 
           # env from configmap
           envFrom:
@@ -139,10 +132,10 @@ spec:
 
           resources:
             requests:
-              cpu: "250m"
-              memory: "512Mi"
+              cpu: "512m"
+              memory: "1024Mi"
             limits:
-              cpu: "500m"
+              cpu: "1024m"
               memory: "1024Mi"
 ---
 # service
