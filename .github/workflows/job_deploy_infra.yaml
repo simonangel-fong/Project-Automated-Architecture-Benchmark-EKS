@@ -181,12 +181,12 @@ jobs:
 
             - name: Deploy Add-ons
               run: |
-                  bash manifest/01_init_add_on.sh
+                  bash manifest/script/01_init_add_on.sh
 
             - name: Deploy backend
               run: |
-                  bash manifest/02_init_deploy_backend.sh
+                  bash manifest/script/02_init_deploy_backend.sh
 
             - name: Initial RDS
               run: |
-                  kubectl apply -f manifest/job/flyway.yaml
+                  kubectl apply -f manifest/script/job/flyway.yaml
