@@ -93,10 +93,12 @@ helm upgrade --install external-dns external-dns/external-dns   \
     --set env[0].valueFrom.secretKeyRef.key=apiKey
 ```
 
-- Shell script
+### Using Shell Script
 
 ```sh
-bash infra/script/init.sh
+bash manifest/01_init_add_on.sh
+bash manifest/02_init_deploy_backend.sh
+bash manifest/03_init_rds.sh
 ```
 
 ---
