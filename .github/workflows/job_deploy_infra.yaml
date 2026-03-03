@@ -177,7 +177,7 @@ jobs:
                   aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
 
             - name: Install Helm
-              uses: azure/setup-helm@v1
+              uses: azure/setup-helm@v4.3.0
 
             - name: Deploy Add-ons
               run: |
