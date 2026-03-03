@@ -9,6 +9,8 @@ echo "#  Apply Application"
 echo "# #################################"
 echo
 
+sleep 20
+
 # kubectl apply -f manifest/$ARCH/01_ns.yaml
 # kubectl apply -f manifest/$ARCH/02_cluste_secret_store.yaml
 # kubectl apply -f manifest/$ARCH/03_external_secrets.yaml
