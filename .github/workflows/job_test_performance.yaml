@@ -9,9 +9,9 @@ on:
         required: true
         type: string
       arch:
-          description: "Architecture"
-          required: true
-          type: string
+        description: "Architecture"
+        required: true
+        type: string
       test_report:
         description: "Report name"
         required: true
@@ -27,11 +27,15 @@ jobs:
     env:
       ENV: ${{ inputs.arch }}
       BASE_URL: ${{ inputs.base_url }}
-      K6_REPORT: k6/report/${{ inputs.test_report }}
-      K6_SCRIPT: k6/script/${{ inputs.test_script }}
+      K6_REPORT: test/k6/report/${{ inputs.test_report }}
+      K6_SCRIPT: test/k6/script/${{ inputs.test_script }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # - name: Wait 10 min
+      #   run: |
+      #     sleep 600
 
       - name: Setup K6
         uses: grafana/setup-k6-action@v1
