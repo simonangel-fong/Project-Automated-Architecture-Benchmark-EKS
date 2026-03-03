@@ -35,6 +35,8 @@ on:
                 description: "AWS role for tf"
             aws_backend_bucket:
                 description: "AWS bucket for tf remote backend"
+            cluster_admin_id:
+                description: "AWS ID for EKS cluster id"
         # outputs:
         #     base_url:
         #         description: "A description of the output"
