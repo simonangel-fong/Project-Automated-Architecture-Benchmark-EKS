@@ -23,20 +23,6 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN   \
     --wait --timeout 10m
 
-# rollout
-kubectl rollout status deployment/aws-load-balancer-controller -n kube-system --timeout=10m
-
-# Check if lbc ready
-for i in {1..60}; do
-  EP=$(kubectl get endpoints -n kube-system aws-load-balancer-webhook-service -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)
-  if [ -n "$EP" ]; then
-    echo "Webhook endpoints ready: $EP"
-    break
-  fi
-  echo "Waiting for aws-load-balancer-webhook-service endpoints..."
-  sleep 5
-done
-
 echo
 echo "# #################################"
 echo "# Setup external dns"
@@ -92,6 +78,21 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
 # helm repo add --force-update metrics-server https://kubernetes-sigs.github.io/metrics-server/
 # helm repo update
 # helm upgrade --install metrics-server metrics-server/metrics-server
+
+
+# rollout
+kubectl rollout status deployment/aws-load-balancer-controller -n kube-system --timeout=10m
+
+# Check if lbc ready
+for i in {1..60}; do
+  EP=$(kubectl get endpoints -n kube-system aws-load-balancer-webhook-service -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)
+  if [ -n "$EP" ]; then
+    echo "Webhook endpoints ready: $EP"
+    break
+  fi
+  echo "Waiting for aws-load-balancer-webhook-service endpoints..."
+  sleep 5
+done
 
 echo
 echo "# #################################"

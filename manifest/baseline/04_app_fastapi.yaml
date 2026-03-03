@@ -9,7 +9,8 @@ metadata:
 data:
   PROJECT: "eks-benchmark"
   ENV: "baseline"
-  DEBUG: "false" 
+  # DEBUG: "false" 
+  DEBUG: "true" 
   LOG_LEVEL: "info"
   POOL_SIZE: "5"
   MAX_OVERFLOW: "0"
