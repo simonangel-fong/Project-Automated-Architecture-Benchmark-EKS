@@ -179,7 +179,7 @@ jobs:
             - name: Install Helm
               uses: azure/setup-helm@v1
               with:
-                  version: v3.20.0
+                  version: v4.3.1
 
             - name: Deploy Add-ons
               run: |
