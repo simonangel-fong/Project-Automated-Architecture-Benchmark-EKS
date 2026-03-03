@@ -189,4 +189,4 @@ jobs:
 
             - name: Initial RDS
               run: |
-                  kubectl apply -f manifest/script/job/flyway.yaml
+                  kubectl apply -f manifest/job/flyway.yaml
