@@ -9,4 +9,4 @@ echo "#  Init RDS"
 echo "# #################################"
 echo
 
-kubectl create -f manifest/job/flyway.yaml 2>/dev/null || kubectl replace -f manifest/job/flyway.yaml
+kubectl create -f manifest/job/flyway.yaml 2>/dev/null || kubectl replace --force -f manifest/job/flyway.yaml
