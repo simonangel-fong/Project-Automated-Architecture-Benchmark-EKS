@@ -59,7 +59,7 @@ jobs:
             TF_VAR_db_readonly_pwd: ${{ secrets.db_readonly_pwd }}
             TF_VAR_cloudflare_api_token: ${{ secrets.cf_api_token }}
             TF_VAR_cloudflare_zone_id: ${{ secrets.cf_zone_id }}
-            TF_VAR_cluster_admin_id: ${{ secrets.cluster_admin_id }}
+            TF_VAR_cluster_admin_arn: ${{ secrets.cluster_admin_arn }}
         outputs:
             vpc_id: ${{ steps.tf-outputs.outputs.vpc_id }}
             iam_role_lbc: ${{ steps.tf-outputs.outputs.lbc_arn }}

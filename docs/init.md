@@ -11,8 +11,7 @@
 # init infra
 # #################################
 terraform -chdir=infra/baseline init --backend-config=backend.config
-terraform -chdir=infra/baseline fmt && terraform -chdir=infra/baseline validate
-terraform -chdir=infra/baseline apply -auto-approve
+terraform -chdir=infra/baseline fmt && terraform -chdir=infra/baseline validate && terraform -chdir=infra/baseline apply -auto-approve
 
 ```
 
@@ -91,6 +90,29 @@ helm upgrade --install external-dns external-dns/external-dns   \
     --set env[0].name=CF_API_TOKEN  \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
     --set env[0].valueFrom.secretKeyRef.key=apiKey
+
+# #################################
+# Setup Kerpenter
+# #################################
+
+helm registry logout public.ecr.aws
+
+helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
+  --namespace karpenter --create-namespace \
+  --set settings.clusterName="${CLUSTER_NAME}" \
+  --set settings.interruptionQueue="${QUEUE_NAME}" \
+  --set webhook.enabled=true \
+  --set controller.env[0].name=AWS_REGION \
+  --set clusterEndpoint=${CLUSTER_ENDPOINT}     \
+  --set controller.env[0].value=ca-central-1 \
+  --timeout 180s
+
+helm uninstall karpenter -n karpenter
+
+# Create NodeClass and NodePool
+kubectl apply -f manifest/karpenter/ec2NodeClass.yaml
+kubectl apply -f manifest/karpenter/nodePool.yaml
+
 ```
 
 ### Using Shell Script
@@ -109,8 +131,12 @@ bash manifest/03_init_rds.sh
 # #################################
 # Apply Application
 # #################################
-kubectl apply -f manifest/init.yaml
-kubectl apply -f manifest/baseline/
+kubectl apply -f manifest/baseline/01_ns.yaml
+kubectl apply -f manifest/baseline/02_cluste_secret_store.yaml
+kubectl apply -f manifest/baseline/03_external_secrets.yaml
+kubectl apply -f manifest/baseline/04_app_fastapi.yaml
+kubectl apply -f manifest/baseline/05_ingress.yaml
+kubectl apply -f manifest/baseline/06_hpa.yaml
 
 # confirm
 kubectl -n backend get po

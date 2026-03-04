@@ -1,0 +1,31 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool  # define what type of node to be launched
+metadata:
+  name: general
+  namespace: karpenter
+spec:
+  template:
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: general
+        namespace: karpenter
+      requirements:
+        - key: "node.kubernetes.io/instance-type"
+          operator: In
+          values: ["c6i.xlarge"]
+        # - key: "karpenter.k8s.aws/instance-category" 
+        #   operator: In 
+        #   values: ["t", "m"] # category letters only
+        - key: "kubernetes.io/arch"
+          operator: In
+          values: ["amd64"]
+        - key: "karpenter.sh/capacity-type"
+          operator: In
+          values: ["on-demand"]
+  limits:
+    cpu: 1000
+  disruption:
+    consolidationPolicy: WhenEmpty  # delete nodes when they become empty.
+    consolidateAfter: 30s

@@ -1,122 +1,122 @@
-# aws_rds.tf
+# # aws_rds.tf
 
-# #################################
-# Variable
-# #################################
-locals {
-  rds_postgres_identifier  = "${var.project_name}-${var.arch}-rds-pgdb"
-  rds_postgres_param_group = "${var.project_name}-${var.arch}-rds-param-group-pgdb"
-}
+# # #################################
+# # Variable
+# # #################################
+# locals {
+#   rds_postgres_identifier  = "${var.project_name}-${var.arch}-rds-pgdb"
+#   rds_postgres_param_group = "${var.project_name}-${var.arch}-rds-param-group-pgdb"
+# }
 
-# ##############################
-# Security Group
-# ##############################
-resource "aws_security_group" "postgres" {
-  name        = "${var.project_name}-${var.arch}-sg-postgres"
-  description = "Allow fastapi to access pgdb"
-  vpc_id      = module.vpc.vpc_id
+# # ##############################
+# # Security Group
+# # ##############################
+# resource "aws_security_group" "postgres" {
+#   name        = "${var.project_name}-${var.arch}-sg-postgres"
+#   description = "Allow fastapi to access pgdb"
+#   vpc_id      = module.vpc.vpc_id
 
-  ingress {
-    description     = "EKS nodes to Postgres"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [module.eks.cluster_primary_security_group_id]
-  }
+#   ingress {
+#     description     = "EKS nodes to Postgres"
+#     from_port       = 5432
+#     to_port         = 5432
+#     protocol        = "tcp"
+#     security_groups = [module.eks.cluster_primary_security_group_id]
+#   }
 
-  egress {
-    description = "egress to private subnet"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = module.vpc.private_subnets_cidr_blocks
-  }
+#   egress {
+#     description = "egress to private subnet"
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = module.vpc.private_subnets_cidr_blocks
+#   }
 
-  tags = {
-    Name = "${var.project_name}-${var.arch}-sg-postgres"
-  }
-}
+#   tags = {
+#     Name = "${var.project_name}-${var.arch}-sg-postgres"
+#   }
+# }
 
-# ##############################
-# Subnet Group
-# ##############################
-resource "aws_db_subnet_group" "postgres" {
-  name = "${var.project_name}-${var.arch}-db-subnet"
+# # ##############################
+# # Subnet Group
+# # ##############################
+# resource "aws_db_subnet_group" "postgres" {
+#   name = "${var.project_name}-${var.arch}-db-subnet"
 
-  subnet_ids = module.vpc.private_subnets
+#   subnet_ids = module.vpc.private_subnets
 
-  tags = {
-    Name = "${var.project_name}-${var.arch}-db-subnet"
-  }
-}
+#   tags = {
+#     Name = "${var.project_name}-${var.arch}-db-subnet"
+#   }
+# }
 
-# ##############################
-# Parameter Group
-# ##############################
-resource "aws_db_parameter_group" "postgres" {
-  name   = local.rds_postgres_param_group
-  family = "postgres17"
+# # ##############################
+# # Parameter Group
+# # ##############################
+# resource "aws_db_parameter_group" "postgres" {
+#   name   = local.rds_postgres_param_group
+#   family = "postgres17"
 
-  parameter {
-    name         = "max_connections"
-    value        = var.rds_max_connection
-    apply_method = "pending-reboot"
-  }
+#   parameter {
+#     name         = "max_connections"
+#     value        = var.rds_max_connection
+#     apply_method = "pending-reboot"
+#   }
 
-  parameter {
-    name  = "timezone"
-    value = "America/Toronto"
-  }
-}
+#   parameter {
+#     name  = "timezone"
+#     value = "America/Toronto"
+#   }
+# }
 
-# ##############################
-# AWS RDS
-# ##############################
-resource "aws_db_instance" "postgres" {
-  identifier = local.rds_postgres_identifier
+# # ##############################
+# # AWS RDS
+# # ##############################
+# resource "aws_db_instance" "postgres" {
+#   identifier = local.rds_postgres_identifier
 
-  # DBA
-  engine               = "postgres"
-  engine_version       = "17.6"
-  parameter_group_name = aws_db_parameter_group.postgres.name
-  apply_immediately    = true # apply modifications right away
+#   # DBA
+#   engine               = "postgres"
+#   engine_version       = "17.6"
+#   parameter_group_name = aws_db_parameter_group.postgres.name
+#   apply_immediately    = true # apply modifications right away
 
-  # backup
-  skip_final_snapshot      = true
-  backup_retention_period  = 0 # no backups for dev/testing
-  delete_automated_backups = true
-  deletion_protection      = false
+#   # backup
+#   skip_final_snapshot      = true
+#   backup_retention_period  = 0 # no backups for dev/testing
+#   delete_automated_backups = true
+#   deletion_protection      = false
 
-  # hardware
-  instance_class    = var.instance_class
-  allocated_storage = 20
-  storage_type      = "gp3"
+#   # hardware
+#   instance_class    = var.instance_class
+#   allocated_storage = 20
+#   storage_type      = "gp3"
 
-  # Credentials
-  username = var.db_username
-  password = var.db_password
-  db_name  = var.db_name
+#   # Credentials
+#   username = var.db_username
+#   password = var.db_password
+#   db_name  = var.db_name
 
-  # Networking
-  publicly_accessible    = false
-  db_subnet_group_name   = aws_db_subnet_group.postgres.name
-  vpc_security_group_ids = [aws_security_group.postgres.id]
+#   # Networking
+#   publicly_accessible    = false
+#   db_subnet_group_name   = aws_db_subnet_group.postgres.name
+#   vpc_security_group_ids = [aws_security_group.postgres.id]
 
-  # Encryption
-  storage_encrypted = true
+#   # Encryption
+#   storage_encrypted = true
 
-  # loging
-  enabled_cloudwatch_logs_exports = ["postgresql"] # enable export log
+#   # loging
+#   enabled_cloudwatch_logs_exports = ["postgresql"] # enable export log
 
-  #   # monitoring
-  #   monitoring_interval = 60 # every 60s
-  #   monitoring_role_arn = aws_iam_role.rds_assume_role.arn
+#   #   # monitoring
+#   #   monitoring_interval = 60 # every 60s
+#   #   monitoring_role_arn = aws_iam_role.rds_assume_role.arn
 
-  tags = {
-    Name = local.rds_postgres_identifier
-  }
+#   tags = {
+#     Name = local.rds_postgres_identifier
+#   }
 
-  # depends_on = [
-  #   aws_cloudwatch_log_group.rds_postgres
-  # ]
-}
+#   # depends_on = [
+#   #   aws_cloudwatch_log_group.rds_postgres
+#   # ]
+# }
