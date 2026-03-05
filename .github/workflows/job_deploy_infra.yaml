@@ -62,9 +62,11 @@ jobs:
             TF_VAR_cluster_admin_arn: ${{ secrets.cluster_admin_arn }}
         outputs:
             vpc_id: ${{ steps.tf-outputs.outputs.vpc_id }}
+            cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
+            cluster_point: ${{ steps.tf-outputs.outputs.cluster_point }}
+            queue_name: ${{ steps.tf-outputs.outputs.queue_name }}
             iam_role_lbc: ${{ steps.tf-outputs.outputs.lbc_arn }}
             iam_role_eso: ${{ steps.tf-outputs.outputs.eso_arn }}
-            cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -133,9 +135,12 @@ jobs:
               id: tf-outputs
               working-directory: ${{ env.TF_DIR }}
               run: |
-                  echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
                   echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
+                  echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+                  echo "CLUSTER_ENDPOINT=$(terraform output -raw cluster_endpoint)" >> $GITHUB_OUTPUT
+                  echo "QUEUE_NAME=$(terraform output -raw queue_name)" >> $GITHUB_OUTPUT
                   echo "LBC_ARN=$(terraform output -raw iam_role_lbc)" >> $GITHUB_OUTPUT
+                  echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
                   echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
 
     deploy_k8s:
@@ -148,13 +153,17 @@ jobs:
             contents: read
             id-token: write # Required for OIDC authentication
         env:
+            ARCH: ${{ inputs.arch }}
             REGION: ${{ inputs.aws_region }}
+
+            VPC_ID: ${{ needs.deploy_infra.outputs.vpc_id }}
             CLUSTER_NAME: ${{ needs.deploy_infra.outputs.cluster_name }}
+            CLUSTER_ENDPOINT: ${{ needs.deploy_infra.outputs.cluster_point }}
+            QUEUE_NAME: ${{ needs.deploy_infra.outputs.queue_name }}
+
             IAM_LBC_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_lbc }}
             IAM_ESO_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_eso }}
-            VPC_ID: ${{ needs.deploy_infra.outputs.vpc_id }}
             CF_TOKEN: ${{ secrets.cf_api_token }}
-            ARCH: ${{ inputs.arch }}
 
         steps:
             - name: Checkout code
