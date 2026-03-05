@@ -11,22 +11,24 @@ output "vpc_id" {
   value = aws_vpc.main.id
 }
 
-# output "iam_role_eso" {
-#   value = aws_iam_role.eso.arn
-# }
+output "iam_role_eso" {
+  value = aws_iam_role.eso.arn
+}
 
-# output "iam_role_lbc" {
-#   value = aws_iam_role.lbc.arn
-# }
+output "iam_role_lbc" {
+  value = aws_iam_role.lbc.arn
+}
 
 output "cluster_endpoint" {
   value = module.eks.cluster_endpoint
 }
 
-# output "queue_name" {
-#   value = module.karpenter.queue_name
-# }
+output "queue_name" {
+  value = module.karpenter.queue_name
+}
 
 output "eks_kubeconfig_command" {
-  value = "\naws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}\n"
+  value = <<-EOF
+    aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}
+  EOF
 }

@@ -116,7 +116,7 @@ resource "aws_route_table_association" "private" {
 # ##############################
 # Private NAT
 # ##############################
-# eip, enable private subnet to access internet
+# eip
 resource "aws_eip" "nat" {
   domain = "vpc"
 
