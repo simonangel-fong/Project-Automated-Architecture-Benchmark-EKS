@@ -29,6 +29,8 @@ output "queue_name" {
 
 output "eks_kubeconfig_command" {
   value = <<-EOF
+
     aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}
+    
   EOF
 }

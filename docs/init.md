@@ -4,19 +4,6 @@
 
 ---
 
-## AWS Init
-
-```sh
-# #################################
-# init infra
-# #################################
-terraform -chdir=infra/baseline init --backend-config=backend.config
-terraform -chdir=infra/baseline fmt && terraform -chdir=infra/baseline validate && terraform -chdir=infra/baseline apply -auto-approve
-
-```
-
----
-
 ## EKS Cluster Init
 
 ```sh
@@ -41,7 +28,7 @@ helm upgrade --install external-secrets external-secrets/external-secrets -n ext
 # external-secrets has been deployed successfully in namespace external-secrets!
 
 # annotate sa
-kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="IAM_ESO_ROLE_ARN" --overwrite
+kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="$IAM_ESO_ROLE_ARN" --overwrite
 # serviceaccount/external-secrets annotated
 
 kubectl apply -f manifest/baseline/external-secret.yaml
@@ -113,9 +100,9 @@ kubectl apply -f manifest/karpenter/baseline.yaml
 ### Using Shell Script
 
 ```sh
-bash manifest/01_init_add_on.sh
-bash manifest/02_init_deploy_backend.sh
-bash manifest/03_init_rds.sh
+bash manifest/script/01_init_add_on.sh
+bash manifest/script/02_init_deploy_backend.sh
+bash manifest/script/03_init_rds.sh
 ```
 
 ---
