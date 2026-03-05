@@ -77,13 +77,8 @@ echo "# #################################"
 echo
 
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
-    --version "1.9.0" \
-    --namespace "karpenter" --create-namespace \
-    --set "settings.clusterName=${CLUSTER_NAME}" \
-    --set "settings.interruptionQueue=${CLUSTER_NAME}" \
-    --set controller.resources.requests.cpu=1 \
-    --set controller.resources.requests.memory=1Gi \
-    --set controller.resources.limits.cpu=1 \
-    --set controller.resources.limits.memory=1Gi \
-    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_KARPENTER_ROLE_ARN   \
-    --wait
+  --namespace kube-system \
+  --set settings.clusterName="${CLUSTER_NAME}" \
+  --set settings.interruptionQueue="${QUEUE_NAME}" \
+  --set webhook.enabled=true \
+  --timeout 180s

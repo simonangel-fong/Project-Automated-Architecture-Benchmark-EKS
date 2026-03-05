@@ -1,50 +1,61 @@
-# # aws_eks_addon.tf
+# aws_eks_addon.tf
 
-# # #########################
-# # EKS Add-on: Kube proxy
-# # #########################
-# resource "aws_eks_addon" "kube_proxy" {
-#   cluster_name  = module.eks.cluster_name
-#   addon_name    = "kube-proxy"
-#   addon_version = "v1.35.0-eksbuild.2"
+# #########################
+# EKS Add-on: Pod Identity
+# #########################
+resource "aws_eks_addon" "pod_identity" {
+  cluster_name  = module.eks.cluster_name
+  addon_name    = "eks-pod-identity-agent"
+  addon_version = "v1.3.10-eksbuild.2"
 
-#   # Ensure nodes exist before proxy install
-#   depends_on = [module.eks.eks_managed_node_groups]
-# }
+  resolve_conflicts_on_update = "PRESERVE"
+}
 
-# # #########################
-# # EKS Add-on: CNI
-# # #########################
-# resource "aws_eks_addon" "vpc_cni" {
-#   cluster_name  = module.eks.cluster_name
-#   addon_name    = "vpc-cni"
-#   addon_version = "v1.21.1-eksbuild.3"
+# #########################
+# EKS Add-on: Kube proxy
+# #########################
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name  = module.eks.cluster_name
+  addon_name    = "kube-proxy"
+  addon_version = "v1.35.0-eksbuild.2"
 
-#   resolve_conflicts_on_update = "PRESERVE"
-# }
+  # Ensure nodes exist before proxy install
+  depends_on = [module.eks.eks_managed_node_groups]
+}
 
-# # #########################
-# # EKS Add-on: Coredns
-# # #########################
-# resource "aws_eks_addon" "coredns" {
-#   cluster_name  = module.eks.cluster_name
-#   addon_name    = "coredns"
-#   addon_version = "v1.13.2-eksbuild.1"
+# #########################
+# EKS Add-on: CNI
+# #########################
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name  = module.eks.cluster_name
+  addon_name    = "vpc-cni"
+  addon_version = "v1.21.1-eksbuild.3"
 
-#   # Ensure nodes exist before coredns install
-#   depends_on = [module.eks.eks_managed_node_groups]
-# }
+  resolve_conflicts_on_update = "PRESERVE"
+}
 
-# # #########################
-# # EKS Add-on: Pod Identity
-# # #########################
-# resource "aws_eks_addon" "pod_identity" {
-#   cluster_name  = module.eks.cluster_name
-#   addon_name    = "eks-pod-identity-agent"
-#   addon_version = "v1.3.10-eksbuild.2"
+# #########################
+# EKS Add-on: Coredns
+# #########################
+resource "aws_eks_addon" "coredns" {
+  cluster_name  = module.eks.cluster_name
+  addon_name    = "coredns"
+  addon_version = "v1.13.2-eksbuild.1"
 
-#   resolve_conflicts_on_update = "PRESERVE"
-# }
+  # Ensure nodes exist before coredns install
+  depends_on = [module.eks.eks_managed_node_groups]
+}
+
+# ###################################
+# EKS Add-on: Metrics Server
+# ###################################
+resource "aws_eks_addon" "metrics_server" {
+  cluster_name  = module.eks.cluster_name
+  addon_name    = "metrics-server"
+  addon_version = "v0.8.1-eksbuild.1"
+
+  resolve_conflicts_on_update = "OVERWRITE"
+}
 
 # # #########################
 # # EKS Add-on: Cloudwatch
@@ -93,13 +104,4 @@
 #   policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 # }
 
-# # ###################################
-# # EKS Add-on: Metrics Server
-# # ###################################
-# resource "aws_eks_addon" "metrics_server" {
-#   cluster_name  = module.eks.cluster_name
-#   addon_name    = "metrics-server"
-#   addon_version = "v0.8.1-eksbuild.1"
 
-#   resolve_conflicts_on_update = "OVERWRITE"
-# }

@@ -1,7 +1,5 @@
 # # baseline/aws_eks_access.tf
 
-
-
 # locals {
 #   access_entries = {
 #     cluster_admin = {

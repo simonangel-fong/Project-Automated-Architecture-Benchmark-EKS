@@ -1,15 +1,15 @@
-# # baseline/output.tf
-# output "api_url" {
-#   value = "https://${local.dns_record}"
-# }
+# baseline/output.tf
+output "api_url" {
+  value = "https://${local.dns_record}"
+}
 
-# output "cluster_name" {
-#   value = module.eks.cluster_name
-# }
+output "cluster_name" {
+  value = module.eks.cluster_name
+}
 
-# output "vpc_id" {
-#   value = module.vpc.vpc_id
-# }
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
 
 # output "iam_role_eso" {
 #   value = aws_iam_role.eso.arn
@@ -19,14 +19,14 @@
 #   value = aws_iam_role.lbc.arn
 # }
 
-# output "cluster_endpoint" {
-#   value = module.eks.cluster_endpoint
+output "cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+
+# output "queue_name" {
+#   value = module.karpenter.queue_name
 # }
 
-# # output "queue_name" {
-# #   value = module.karpenter.queue_name
-# # }
-
-# output "eks_kubeconfig_command" {
-#   value = "\naws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}\n"
-# }
+output "eks_kubeconfig_command" {
+  value = "\naws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}\n"
+}
