@@ -18,6 +18,7 @@ terraform -chdir=infra/baseline init --backend-config=backend.config
 terraform -chdir=infra/baseline fmt && terraform -chdir=infra/baseline validate && terraform -chdir=infra/baseline apply -auto-approve
 
 terraform -chdir=infra/baseline refresh
+terraform -chdir=infra/baseline apply -destroy -auto-approve
 
 ```
 
