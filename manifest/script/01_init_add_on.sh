@@ -69,7 +69,6 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
     --set serviceAccount.name=external-secrets      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
 
-
 echo
 echo "# #################################"
 echo "# Setup Karpenter"

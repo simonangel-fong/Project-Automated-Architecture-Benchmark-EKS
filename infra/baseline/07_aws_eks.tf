@@ -1,4 +1,4 @@
-# baseline/aws_eks.tf
+# aws_eks.tf
 
 ################################################################################
 # EKS Module
@@ -24,7 +24,7 @@ module "eks" {
   eks_managed_node_groups = {
     bootstrap = {
       ami_type       = "BOTTLEROCKET_x86_64"
-      instance_types = [var.instance_class]
+      instance_types = var.node_instance_types
 
       desired_size = var.desired_size
       min_size     = var.min_size
