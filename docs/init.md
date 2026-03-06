@@ -93,26 +93,27 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
   --set webhook.enabled=true \
-  --timeout 
-  
-
-# #################################
-# Init k8s
-# #################################
-kubectl apply -f manifest/backend_scale/01_ns.yaml
-kubectl apply -f manifest/backend_scale/02_karpenter.yaml
+  --timeout
 
 ```
 
----
-
 ### Deploy Backend
 
-
 ```sh
+# #################################
+# Init backend
+# #################################
+kubectl apply -f manifest/backend_scale/01_ns.yaml
+kubectl apply -f manifest/backend_scale/02_karpenter.yaml
+kubectl apply -f manifest/backend_scale/03_external_secrets.yaml
+kubectl apply -f manifest/backend_scale/04_app_fastapi.yaml
+kubectl apply -f manifest/backend_scale/05_ingress.yaml
+kubectl apply -f manifest/backend_scale/06_hpa.yaml
 
-# Create NodeClass and NodePool
-kubectl apply -f manifest/karpenter/baseline.yaml
+# #################################
+# Init rds
+# #################################
+kubectl apply -f manifest/job/flyway.yaml
 
 ```
 
@@ -122,50 +123,6 @@ kubectl apply -f manifest/karpenter/baseline.yaml
 bash manifest/script/01_init_add_on.sh
 bash manifest/script/02_init_deploy_backend.sh
 bash manifest/script/03_init_rds.sh
-```
-
----
-
-## Deploy Application
-
-```sh
-# #################################
-# Apply Application
-# #################################
-kubectl apply -f manifest/baseline/01_ns.yaml
-kubectl apply -f manifest/baseline/02_cluste_secret_store.yaml
-kubectl apply -f manifest/baseline/03_external_secrets.yaml
-kubectl apply -f manifest/baseline/04_app_fastapi.yaml
-kubectl apply -f manifest/baseline/05_ingress.yaml
-kubectl apply -f manifest/baseline/06_hpa.yaml
-
-# confirm
-kubectl -n backend get po
-```
-
----
-
-## Init DB Job
-
-```sh
-kubectl apply -f manifest/job/flyway.yaml
-# job.batch/init-db-flyway created
-
-kubectl -n backend logs -l job-name=init-db-flyway -f
-# Migrating schema "public" to version "010 - create tb device registry"
-# DB: trigger "trg_device_registry_set_updated_at" for relation "app.device_registry" does not exist, skipping
-# Migrating schema "public" to version "011 - create tb telemetry event"
-# Migrating schema "public" to version "012 - create tb telemetry latest"
-# DB: trigger "trg_telemetry_event_upsert_latest" for relation "app.telemetry_event" does not exist, skipping
-# Migrating schema "public" to version "013 - create tb telemetry latest outbox"
-# DB: trigger "trg_telemetry_latest_outbox" for relation "app.telemetry_event" does not exist, skipping
-# Migrating schema "public" to version "020 - seed tb device registry"
-# Migrating schema "public" to version "021 - seed tb telemetry event"
-# Successfully applied 11 migrations to schema "public", now at version v021 (execution time 00:01.522s)
-
-kubectl -n backend get jobs
-# NAME             STATUS     COMPLETIONS   DURATION   AGE
-# init-db-flyway   Complete   1/1           27s        115s
 ```
 
 ---

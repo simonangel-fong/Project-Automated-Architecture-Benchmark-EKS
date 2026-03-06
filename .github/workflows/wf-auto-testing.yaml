@@ -24,8 +24,8 @@ jobs:
       fail-fast: false
       matrix:
         solution:
-          - arch: baseline
-          # - arch: scale
+          # - arch: baseline
+          - arch: scale
           # - arch: redis
           # - arch: kafka
     with:
