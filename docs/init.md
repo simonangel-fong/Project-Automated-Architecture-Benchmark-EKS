@@ -98,6 +98,9 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set webhook.enabled=true \
   --wait
 
+
+helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter --namespace kube-system --set settings.clusterName="eks-benchmark-baseline" --set settings.interruptionQueue="Karpenter-eks-benchmark-baseline" --set webhook.enabled=true --wait
+
 ```
 
 ### Deploy Backend
@@ -144,6 +147,10 @@ vi ns.json
 
 kubectl replace --raw "/api/v1/namespaces/backend/finalize" -f ns.json
 kubectl patch ingress nginx-alb -n backend -p '{"metadata":{"finalizers":null}}'
+
+
+# secret managers
+aws secretsmanager delete-secret --secret-id secret_id --region aws_region --force-delete-without-recovery
 ```
 
 ---

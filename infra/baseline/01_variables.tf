@@ -53,7 +53,7 @@ variable "kube_version" {
 
 variable "node_instance_types" {
   type    = list(string)
-  default = ["t3.medium"]
+  default = ["t3.large"]
 }
 
 variable "desired_size" {
