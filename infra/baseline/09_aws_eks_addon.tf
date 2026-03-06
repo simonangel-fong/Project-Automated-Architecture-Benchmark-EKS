@@ -47,24 +47,31 @@ resource "aws_eks_addon" "coredns" {
 # ###################################
 # EKS Add-on: Metrics Server
 # ###################################
-resource "aws_eks_addon" "metrics_server" {
-  cluster_name  = module.eks.cluster_name
-  addon_name    = "metrics-server"
-  addon_version = "v0.8.1-eksbuild.1"
-
-  resolve_conflicts_on_update = "OVERWRITE"
-}
-
-# #########################
-# EKS Add-on: Cloudwatch
-# #########################
 resource "aws_eks_addon" "cloudwatch" {
   cluster_name  = module.eks.cluster_name
   addon_name    = "amazon-cloudwatch-observability"
   addon_version = "v4.10.1-eksbuild.1"
 
   resolve_conflicts_on_create = "NONE"
-  resolve_conflicts_on_update = "PRESERVE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  configuration_values = jsonencode({
+    containerLogs = {
+      enabled = false
+    }
+
+    agent = {
+      config = {
+        logs = {
+          metrics_collected = {
+            kubernetes = {
+              enhanced_container_insights = true
+            }
+          }
+        }
+      }
+    }
+  })
 
   pod_identity_association {
     role_arn        = aws_iam_role.cloudwatch.arn

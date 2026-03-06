@@ -43,7 +43,7 @@ on:
         #         value: ${{ jobs.deploy.outputs.base_url }}
 jobs:
     deploy_infra:
-        name: Deploy AWS ${{ inputs.arch }}
+        name: ${{ inputs.arch }}-Deploy-AWS
         runs-on: ubuntu-latest
         timeout-minutes: 60
         env:
@@ -144,7 +144,7 @@ jobs:
                   echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
 
     deploy_k8s:
-        name: Deploy K8s ${{ inputs.arch }}
+        name: K8s(${{ inputs.arch }}) deployment
         needs:
             - deploy_infra
         runs-on: ubuntu-latest
