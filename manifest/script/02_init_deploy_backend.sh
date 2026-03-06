@@ -24,7 +24,7 @@ echo "# #################################"
 echo
 
 kubectl create -f manifest/backend/$ARCH/01_ns.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/01_ns.yaml
-kubectl create -f manifest/backend/$ARCH/02_cluste_secret_store.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/02_cluste_secret_store.yaml
+kubectl create -f manifest/backend/$ARCH/02_karpenter.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/02_karpenter.yaml
 kubectl create -f manifest/backend/$ARCH/03_external_secrets.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/03_external_secrets.yaml
 kubectl create -f manifest/backend/$ARCH/04_app_fastapi.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/04_app_fastapi.yaml
 kubectl create -f manifest/backend/$ARCH/05_ingress.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/05_ingress.yaml
