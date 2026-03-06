@@ -6,6 +6,8 @@
 
 ## EKS Cluster Init
 
+### Add-on
+
 ```sh
 # add kubeconfig
 aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
@@ -14,9 +16,6 @@ aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 # #################################
 # Setup external eso
 # #################################
-helm repo add --force-update external-secrets https://charts.external-secrets.io
-helm repo update external-secrets
-
 helm upgrade --install  external-secrets external-secrets   \
     --repo https://charts.external-secrets.io   \
     -n external-secrets --create-namespace      \
@@ -36,17 +35,15 @@ helm upgrade --install  external-secrets external-secrets   \
 kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="$IAM_ESO_ROLE_ARN" --overwrite
 # serviceaccount/external-secrets annotated
 
-kubectl apply -f manifest/baseline/external-secret.yaml
-# clustersecretstore.external-secrets.io/aws-secrets-global created
-# externalsecret.external-secrets.io/app-cred created
+kubectl apply -f manifest/addon/01_external_secrets.yaml
+
 
 # #################################
 # Setup external lbc
 # #################################
-helm repo add eks --force-update https://aws.github.io/eks-charts
-helm repo update
-helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
-    -n kube-system \
+helm upgrade --install  aws-load-balancer-controller aws-load-balancer-controller   \
+    --repo https://aws.github.io/eks-charts     \
+    -n kube-system                      \
     --set clusterName=$CLUSTER_NAME     \
     --set vpcId=$VPC_ID                 \
     --set serviceAccount.create=true    \
@@ -64,24 +61,26 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
 # NOTES:
 # AWS Load Balancer controller installed!
 
+
 # #################################
 # Setup external dns
 # #################################
-kubectl -n external-dns create secret generic cloudflare-api-key --from-literal=apiKey="cloud_token"
+kubectl -n external-dns create secret generic cloudflare-api-key \
+--from-literal=apiKey="$CF_TOKEN" \
+--dry-run=client -o yaml | kubectl apply -f -
 
-helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
-helm repo update
-helm upgrade --install external-dns external-dns/external-dns   \
-    -n external-dns     \
-    --create-namespace  \
-    --set provider.name=cloudflare  \
-    --set sources[0]=ingress        \
-    --set policy=sync   \
-    --set registry=txt  \
-    --set domainFilters[0]=arguswatcher.net     \
-    --set env[0].name=CF_API_TOKEN  \
+helm upgrade --install  external-dns external-dns           \
+    --repo https://kubernetes-sigs.github.io/external-dns   \
+    -n external-dns --create-namespace      \
+    --set provider.name=cloudflare          \
+    --set sources[0]=ingress                \
+    --set policy=sync                       \
+    --set registry=txt                      \
+    --set domainFilters[0]=arguswatcher.net \
+    --set env[0].name=CF_API_TOKEN          \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
     --set env[0].valueFrom.secretKeyRef.key=apiKey
+
 
 # #################################
 # Setup Kerpenter
@@ -94,8 +93,20 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
   --set webhook.enabled=true \
-  --timeout 180s
+  --timeout 
+  
 
+
+
+
+```
+
+---
+
+### Deploy Backend
+
+
+```sh
 
 # Create NodeClass and NodePool
 kubectl apply -f manifest/karpenter/baseline.yaml
