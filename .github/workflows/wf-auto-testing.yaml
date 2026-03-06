@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         solution:
-          # - arch: baseline
+          - arch: baseline
           - arch: scale
           # - arch: redis
           # - arch: kafka
@@ -53,9 +53,9 @@ jobs:
       fail-fast: false
       matrix:
         solution:
-          # - arch: baseline
-          #   base_url: "https://eks-benchmark-baseline.arguswatcher.net"
-          #   test_report: baseline_cicd_mixed.html
+          - arch: baseline
+            base_url: "https://eks-benchmark-baseline.arguswatcher.net"
+            test_report: baseline_cicd_mixed.html
           - arch: scale
             base_url: "https://eks-benchmark-scale.arguswatcher.net"
             test_report: scale_cicd_mixed.html
