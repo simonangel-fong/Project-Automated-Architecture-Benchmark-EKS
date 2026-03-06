@@ -57,7 +57,7 @@ jobs:
           #   base_url: "https://eks-benchmark-baseline.arguswatcher.net"
           #   test_report: baseline_cicd_mixed.html
           - arch: scale
-            base_url: "https://benchmark-scale.arguswatcher.net"
+            base_url: "https://eks-benchmark-scale.arguswatcher.net"
             test_report: scale_cicd_mixed.html
           # - arch: redis
           #   base_url: "https://benchmark-redis.arguswatcher.net"
