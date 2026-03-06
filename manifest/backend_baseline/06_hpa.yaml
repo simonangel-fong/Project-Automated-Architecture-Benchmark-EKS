@@ -1,4 +1,4 @@
-# baseline/06_hpa.yaml
+# hpa.yaml
 # hpa
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

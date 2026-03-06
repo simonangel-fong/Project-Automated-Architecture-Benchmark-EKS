@@ -1,4 +1,4 @@
-# baseline/04_fastapi.yaml
+# app_fastapi.yaml
 
 # configMap
 apiVersion: v1
@@ -45,7 +45,7 @@ spec:
         app.kubernetes.io/part-of: eks-benchmark
         app.kubernetes.io/component: api
       annotations:
-        kubernetes.io/change-cause: "baseline fastapi deploy"
+        kubernetes.io/change-cause: "fastapi deploy"
     spec:
       terminationGracePeriodSeconds: 45
       topologySpreadConstraints:

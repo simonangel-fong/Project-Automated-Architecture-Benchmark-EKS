@@ -1,4 +1,4 @@
-# manifest\addon\03_karpenter.yaml
+# karpenter.yaml
 ---
 apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
@@ -7,18 +7,18 @@ metadata:
   namespace: backend
 spec:
   # match node_iam_role_name in karpenter
-  role: "${CLUSTER_NAME}" 
+  role: "eks-benchmark-scale" 
   # Specify AMI
   amiSelectorTerms:
     - alias: bottlerocket@latest
   # Specify subnet: match vpc subnet tag
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: "${CLUSTER_NAME}" 
+        karpenter.sh/discovery: "eks-benchmark-scale" 
   # Specify subnet: match security group
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: "${CLUSTER_NAME}" 
+        karpenter.sh/discovery: "eks-benchmark-scale" 
 ---
 apiVersion: karpenter.sh/v1
 kind: NodePool

@@ -8,7 +8,7 @@ metadata:
   namespace: backend
 data:
   PROJECT: "eks-benchmark"
-  ENV: "${ARCH}"
+  ENV: "scale"
   # DEBUG: "false" 
   DEBUG: "true" 
   LOG_LEVEL: "info"

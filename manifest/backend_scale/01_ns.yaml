@@ -1,4 +1,4 @@
-# baseline/ns.yaml
+# ns.yaml
 # namespace
 apiVersion: v1
 kind: Namespace
