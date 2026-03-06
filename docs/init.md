@@ -16,7 +16,12 @@ aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 # #################################
 helm repo add --force-update external-secrets https://charts.external-secrets.io
 helm repo update external-secrets
-helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets --version 2.0.1 --create-namespace --set installCRDs=true
+
+helm upgrade --install  external-secrets external-secrets   \
+    --repo https://charts.external-secrets.io   \
+    -n external-secrets --create-namespace      \
+    --version 2.0.1                             \
+    --set installCRDs=true
 # Release "external-secrets" does not exist. Installing it now.
 # NAME: external-secrets
 # LAST DEPLOYED: Sat Feb 28 13:42:10 2026

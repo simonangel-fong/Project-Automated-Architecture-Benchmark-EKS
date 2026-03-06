@@ -18,7 +18,7 @@ terraform -chdir=infra/scale init --backend-config=backend.config
 terraform -chdir=infra/scale fmt && terraform -chdir=infra/scale validate
 terraform -chdir=infra/scale apply -auto-approve
 
-terraform -chdir=infra/scale refresh
+terraform -chdir=infra/scale refresh && terraform -chdir=infra/scale output
 terraform -chdir=infra/scale apply -destroy -auto-approve
 
 # #################################

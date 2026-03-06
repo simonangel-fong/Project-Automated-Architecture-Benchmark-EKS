@@ -34,3 +34,21 @@ output "eks_kubeconfig_command" {
     
   EOF
 }
+
+output "export_env" {
+  value = <<-EOF
+
+    aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}
+    
+    export ARCH="${var.arch}"
+    export REGION="${var.aws_region}"
+
+    export VPC_ID="${aws_vpc.main.id}"
+    export CLUSTER_NAME="${module.eks.cluster_name}"
+    export CLUSTER_ENDPOINT="${module.eks.cluster_endpoint}"
+    export QUEUE_NAME="${module.karpenter.queue_name}"
+
+    export IAM_ESO_ROLE_ARN="${aws_iam_role.eso.arn}"
+    export IAM_LBC_ROLE_ARN="${aws_iam_role.lbc.arn}"
+  EOF
+}
