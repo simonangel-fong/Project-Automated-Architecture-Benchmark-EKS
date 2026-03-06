@@ -96,7 +96,7 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
   --set webhook.enabled=true \
-  --timeout
+  --wait
 
 ```
 
