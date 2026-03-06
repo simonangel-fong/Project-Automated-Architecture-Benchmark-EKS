@@ -8,20 +8,32 @@ aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
 
 echo
 echo "# #################################"
-echo "# Setup external lbc"
+echo "# Setup external eso"
 echo "# #################################"
 echo
+helm upgrade --install  external-secrets external-secrets   \
+    --repo https://charts.external-secrets.io   \
+    -n external-secrets --create-namespace      \
+    --version 2.0.1                             \
+    --set installCRDs=true
 
-helm repo add eks https://aws.github.io/eks-charts
-helm repo update
-helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
-    -n kube-system \
+kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="$IAM_ESO_ROLE_ARN" --overwrite
+
+echo
+echo "# #################################"
+echo "# Setup external albc"
+echo "# #################################"
+echo
+helm upgrade --install  aws-load-balancer-controller aws-load-balancer-controller   \
+    --repo https://aws.github.io/eks-charts     \
+    -n kube-system                      \
     --set clusterName=$CLUSTER_NAME     \
     --set vpcId=$VPC_ID                 \
     --set serviceAccount.create=true    \
     --set serviceAccount.name=aws-load-balancer-controller      \
-    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN   \
-    --wait --timeout 10m
+    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN
+
+sleep 10
 
 echo
 echo "# #################################"
@@ -36,48 +48,37 @@ kubectl -n external-dns create secret generic cloudflare-api-key \
 --from-literal=apiKey="$CF_TOKEN" \
 --dry-run=client -o yaml | kubectl apply -f -
 
-helm repo add external-dns --force-update https://kubernetes-sigs.github.io/external-dns/
-helm repo update
-helm upgrade --install external-dns external-dns/external-dns   \
-    -n external-dns     \
-    --create-namespace  \
-    --set provider.name=cloudflare  \
-    --set sources[0]=ingress        \
-    --set policy=sync   \
-    --set registry=txt  \
-    --set domainFilters[0]=arguswatcher.net     \
-    --set env[0].name=CF_API_TOKEN  \
+helm upgrade --install  external-dns external-dns           \
+    --repo https://kubernetes-sigs.github.io/external-dns   \
+    -n external-dns --create-namespace      \
+    --set provider.name=cloudflare          \
+    --set sources[0]=ingress                \
+    --set policy=sync                       \
+    --set registry=txt                      \
+    --set domainFilters[0]=arguswatcher.net \
+    --set env[0].name=CF_API_TOKEN          \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
     --set env[0].valueFrom.secretKeyRef.key=apiKey
 
-sleep 15
-
-echo
-echo "# #################################"
-echo "# Setup external eso"
-echo "# #################################"
-echo
-
-helm repo add --force-update external-secrets https://charts.external-secrets.io
-helm repo update external-secrets
-helm upgrade --install external-secrets external-secrets/external-secrets \
-    -n external-secrets         \
-    --create-namespace          \
-    --version 2.0.1             \
-    --set installCRDs=true      \
-    --set serviceAccount.create=true    \
-    --set serviceAccount.name=external-secrets      \
-    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_ESO_ROLE_ARN
+sleep 10
 
 echo
 echo "# #################################"
 echo "# Setup Karpenter"
 echo "# #################################"
 echo
-
+helm registry logout public.ecr.aws
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --namespace kube-system \
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
   --set webhook.enabled=true \
-  --timeout 180s
+  --timeout
+
+sleep 10
+
+echo
+echo "# #################################"
+echo "# Add-on installed Completed."
+echo "# #################################"
+echo

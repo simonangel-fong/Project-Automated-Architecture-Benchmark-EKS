@@ -65,6 +65,9 @@ helm upgrade --install  aws-load-balancer-controller aws-load-balancer-controlle
 # #################################
 # Setup external dns
 # #################################
+kubectl create ns external-dns --dry-run=client -o yaml | kubectl apply -f -
+
+# create secret for cf
 kubectl -n external-dns create secret generic cloudflare-api-key \
 --from-literal=apiKey="$CF_TOKEN" \
 --dry-run=client -o yaml | kubectl apply -f -
