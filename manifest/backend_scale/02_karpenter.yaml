@@ -32,7 +32,7 @@ spec:
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
-        name: general-node-classgeneral
+        name: general-node-class
       requirements:
         - key: "node.kubernetes.io/instance-type"
           operator: In

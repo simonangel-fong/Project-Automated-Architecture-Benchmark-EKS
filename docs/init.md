@@ -99,7 +99,8 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
 # #################################
 # Init k8s
 # #################################
-kubectl apply -f manifest/backend/01_ns.yaml
+kubectl apply -f manifest/backend_scale/01_ns.yaml
+kubectl apply -f manifest/backend_scale/02_karpenter.yaml
 
 ```
 
