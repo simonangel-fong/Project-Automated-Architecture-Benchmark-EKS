@@ -11,7 +11,6 @@ spec:
     kind: Deployment
     name: fastapi
   minReplicas: 1
-  # minReplicas: 4
   maxReplicas: 20
   metrics:
     - type: Resource
@@ -19,20 +18,20 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50
+          averageUtilization: 80
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
         - type: Percent
           value: 100
-          periodSeconds: 60
+          periodSeconds: 30
         - type: Pods
-          value: 2
-          periodSeconds: 60
+          value: 1
+          periodSeconds: 30
       selectPolicy: Max
     scaleDown:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 60
       policies:
         - type: Percent
           value: 25
