@@ -46,8 +46,8 @@ jobs:
 
   performance_testing_mixed:
     name: Performance Testing-Mixed
-    # needs:
-    #   - deploy_infra
+    needs:
+      - deploy_infra
     uses: ./.github/workflows/job_test_performance.yaml
     strategy:
       fail-fast: false
