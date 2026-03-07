@@ -43,7 +43,7 @@ on:
         #         value: ${{ jobs.deploy.outputs.base_url }}
 jobs:
     deploy_infra:
-        name: ${{ inputs.arch }}-Deploy-AWS
+        name: AWS(${{ inputs.arch }})-Deployment
         runs-on: ubuntu-latest
         timeout-minutes: 60
         env:
