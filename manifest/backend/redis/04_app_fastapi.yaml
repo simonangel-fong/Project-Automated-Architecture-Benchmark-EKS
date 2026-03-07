@@ -144,10 +144,10 @@ spec:
           resources:
             requests:
               cpu: "1024m"
-              memory: "1024Mi"
+              memory: "2024Mi"
             limits:
               cpu: "1024m"
-              memory: "1024Mi"
+              memory: "2024Mi"
 ---
 # service
 apiVersion: v1
