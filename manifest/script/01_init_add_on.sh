@@ -71,10 +71,13 @@ echo
 helm registry logout public.ecr.aws
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --namespace kube-system \
+  --version "1.9.0" 
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
   --set webhook.enabled=true \
-  --wait
+  --wait \
+  --timeout 10m \
+  --debug
 
 sleep 10
 
