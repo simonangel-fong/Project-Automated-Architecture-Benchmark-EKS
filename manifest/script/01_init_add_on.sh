@@ -68,6 +68,8 @@ echo "# #################################"
 echo "# Setup Karpenter"
 echo "# #################################"
 echo
+
+kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
 helm registry logout public.ecr.aws
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --namespace kube-system \
@@ -75,9 +77,9 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
   --set webhook.enabled=true    \
+  --debug
 #   --wait \
 #   --timeout 10m \
-  --debug
 
 sleep 10
 
