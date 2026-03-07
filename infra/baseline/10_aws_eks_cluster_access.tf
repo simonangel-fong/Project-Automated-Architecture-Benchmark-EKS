@@ -93,30 +93,30 @@ locals {
 # }
 
 
-resource "aws_eks_access_entry" "eks" {
-  for_each = local.access_entries
+# resource "aws_eks_access_entry" "eks" {
+#   for_each = local.access_entries
 
-  cluster_name  = module.eks.cluster_name
-  principal_arn = each.value.principal_arn
-  type          = "STANDARD"
+#   cluster_name  = module.eks.cluster_name
+#   principal_arn = each.value.principal_arn
+#   type          = "STANDARD"
 
-  tags = {
-    Description = each.value.description
-    ManagedBy   = "terraform"
-  }
-}
+#   tags = {
+#     Description = each.value.description
+#     ManagedBy   = "terraform"
+#   }
+# }
 
-resource "aws_eks_access_policy_association" "eks" {
-  for_each = local.access_entries
+# resource "aws_eks_access_policy_association" "eks" {
+#   for_each = local.access_entries
 
-  cluster_name  = module.eks.cluster_name
-  principal_arn = each.value.principal_arn
-  policy_arn    = each.value.policy_arn
+#   cluster_name  = module.eks.cluster_name
+#   principal_arn = each.value.principal_arn
+#   policy_arn    = each.value.policy_arn
 
-  access_scope {
-    type       = each.value.scope
-    namespaces = each.value.scope == "namespace" ? each.value.namespaces : []
-  }
+#   access_scope {
+#     type       = each.value.scope
+#     namespaces = each.value.scope == "namespace" ? each.value.namespaces : []
+#   }
 
-  depends_on = [aws_eks_access_entry.eks]
-}
+#   depends_on = [aws_eks_access_entry.eks]
+# }
