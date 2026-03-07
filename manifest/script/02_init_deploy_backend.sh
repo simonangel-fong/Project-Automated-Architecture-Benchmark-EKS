@@ -27,6 +27,6 @@ kubectl create -f manifest/backend/$ARCH/01_ns.yaml 2>/dev/null || kubectl repla
 kubectl create -f manifest/backend/$ARCH/02_karpenter.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/02_karpenter.yaml
 kubectl create -f manifest/backend/$ARCH/03_external_secrets.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/03_external_secrets.yaml
 kubectl create -f manifest/backend/$ARCH/04_app_fastapi.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/04_app_fastapi.yaml
-kubectl create -f manifest/backend/$ARCH/05_ingress.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/05_ingress.yaml
-kubectl create -f manifest/backend/$ARCH/06_hpa.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/06_hpa.yaml
+kubectl create -f manifest/backend/$ARCH/05_hpa.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/05_hpa.yaml
+kubectl create -f manifest/backend/$ARCH/06_ingress.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/06_ingress.yaml
 
