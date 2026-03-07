@@ -47,6 +47,17 @@ resource "aws_eks_addon" "coredns" {
 # ###################################
 # EKS Add-on: Metrics Server
 # ###################################
+resource "aws_eks_addon" "metrics_server" {
+  cluster_name  = module.eks.cluster_name
+  addon_name    = "metrics-server"
+  addon_version = "v0.8.1-eksbuild.1"
+
+  depends_on = [module.eks.eks_managed_node_groups]
+}
+
+# ###################################
+# EKS Add-on: CloudWatcher
+# ###################################
 resource "aws_eks_addon" "cloudwatch" {
   cluster_name  = module.eks.cluster_name
   addon_name    = "amazon-cloudwatch-observability"
