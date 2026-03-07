@@ -71,7 +71,7 @@ jobs:
                   CLUSTER_NAME: ${{ inputs.project }}-${{ inputs.arch }}
                   ARCH: ${{ inputs.arch }}
               run: |
-                  bash manifest/destroy.sh
+                  bash manifest/script/99_destroy.sh
 
     destroy_infra:
         name: Destroy Infra ${{ inputs.arch }}
@@ -151,9 +151,7 @@ jobs:
                       ${{ env.TF_DIR }}/tfplan-destroy.json
                   retention-days: 3
 
-            - name: Remove 
-              run: |
-                  bash manifest/script/99_destroy.sh
+
 
             - name: Destroy - Terraform Apply
               working-directory: ${{ env.TF_DIR }}

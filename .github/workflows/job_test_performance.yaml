@@ -22,7 +22,7 @@ on:
         type: string
 jobs:
   testing-performance:
-    name: Performance Testing ${{ inputs.arch }}
+    name: Testing(${{ inputs.arch }})
     runs-on: ubuntu-latest
     env:
       ENV: ${{ inputs.arch }}
