@@ -33,7 +33,7 @@ helm upgrade --install  aws-load-balancer-controller aws-load-balancer-controlle
     --set serviceAccount.name=aws-load-balancer-controller      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN
 
-sleep 10
+sleep 20
 
 echo
 echo "# #################################"
@@ -61,7 +61,7 @@ helm upgrade --install  external-dns external-dns           \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
     --set env[0].valueFrom.secretKeyRef.key=apiKey  
 
-sleep 10
+sleep 20
 
 echo
 echo "# #################################"
