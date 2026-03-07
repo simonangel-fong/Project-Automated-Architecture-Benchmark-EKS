@@ -97,7 +97,17 @@ spec:
                 secretKeyRef:
                   name: app-cred
                   key: POSTGRES__PASSWORD
-          
+            - name: REDIS__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: REDIS__HOST
+            - name: REDIS__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: REDIS__PORT
+
           # startup
           startupProbe:
             httpGet:

@@ -31,7 +31,7 @@ output "eks_kubeconfig_command" {
   value = <<-EOF
 
     aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}
-    
+
   EOF
 }
 
@@ -50,6 +50,6 @@ output "export_env" {
     export IAM_LBC_ROLE_ARN="${aws_iam_role.lbc.arn}"
 
     aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}
-    
+
   EOF
 }

@@ -7,17 +7,15 @@
 # Locals
 # #################################
 locals {
-  redis_port           = 6379
-  redis_name           = "${var.project_name}-${var.arch}"
-  redis_replication_id = "${var.project_name}-${var.arch}"
-  redis_logging_name   = "${var.project_name}-${var.arch}-redis"
+  redis_name = "${var.project_name}-${var.arch}"
+  redis_port = 6379
 }
 
 # #################################
 # Security Group for Redis
 # #################################
 resource "aws_security_group" "redis" {
-  name        = "${var.project_name}-${var.arch}-sg-redis"
+  name        = "${local.redis_name}-redis"
   description = "Allow access to Redis from app services"
   vpc_id      = aws_vpc.main.id
 
@@ -39,7 +37,7 @@ resource "aws_security_group" "redis" {
   }
 
   tags = {
-    Name    = "${var.project_name}-${var.arch}-sg-redis"
+    Name    = "${local.redis_name}-redis"
     Project = var.project_name
     Arch    = var.arch
   }
@@ -49,11 +47,11 @@ resource "aws_security_group" "redis" {
 # Subnet Group for Redis
 # #################################
 resource "aws_elasticache_subnet_group" "redis" {
-  name       = "${local.redis_name}-redis-subnet-group"
+  name       = local.redis_name
   subnet_ids = [for subnet in aws_subnet.private : subnet.id]
 
   tags = {
-    Name    = "${local.redis_name}-redis-subnet-group"
+    Name    = local.redis_name
     Project = var.project_name
     Arch    = var.arch
   }
@@ -78,7 +76,7 @@ resource "aws_elasticache_parameter_group" "redis" {
 # Redis Replication Group
 # #################################
 resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id = local.redis_replication_id
+  replication_group_id = local.redis_name
   description          = "Redis for ${local.redis_name} app"
   engine               = "redis"
   engine_version       = "7.1"

@@ -4,6 +4,7 @@
 # Variable
 # #################################
 locals {
+  rds_name                 = "${var.project_name}-${var.arch}"
   rds_postgres_identifier  = "${var.project_name}-${var.arch}-rds-pgdb"
   rds_postgres_param_group = "${var.project_name}-${var.arch}-rds-param-group-pgdb"
 }
@@ -12,7 +13,7 @@ locals {
 # Security Group
 # ##############################
 resource "aws_security_group" "postgres" {
-  name        = "${var.project_name}-${var.arch}-sg-postgres"
+  name        = local.rds_name
   description = "Allow fastapi to access pgdb"
   vpc_id      = aws_vpc.main.id
 
@@ -33,7 +34,7 @@ resource "aws_security_group" "postgres" {
   }
 
   tags = {
-    Name = "${var.project_name}-${var.arch}-sg-postgres"
+    Name = local.rds_name
   }
 }
 
@@ -41,12 +42,11 @@ resource "aws_security_group" "postgres" {
 # Subnet Group
 # ##############################
 resource "aws_db_subnet_group" "postgres" {
-  name = "${var.project_name}-${var.arch}-db-subnet"
-
+  name       = local.rds_name
   subnet_ids = [for s in aws_subnet.private : s.id]
 
   tags = {
-    Name = "${var.project_name}-${var.arch}-db-subnet"
+    Name = local.rds_name
   }
 }
 
@@ -54,7 +54,7 @@ resource "aws_db_subnet_group" "postgres" {
 # Parameter Group
 # ##############################
 resource "aws_db_parameter_group" "postgres" {
-  name   = local.rds_postgres_param_group
+  name   = local.rds_name
   family = "postgres17"
 
   parameter {
@@ -73,7 +73,7 @@ resource "aws_db_parameter_group" "postgres" {
 # AWS RDS
 # ##############################
 resource "aws_db_instance" "postgres" {
-  identifier = local.rds_postgres_identifier
+  identifier = local.rds_name
 
   # DBA
   engine               = "postgres"
@@ -105,15 +105,15 @@ resource "aws_db_instance" "postgres" {
   # Encryption
   storage_encrypted = true
 
-  # loging
-  enabled_cloudwatch_logs_exports = ["postgresql"] # enable export log
+  # # loging
+  # enabled_cloudwatch_logs_exports = ["postgresql"] # enable export log
 
   #   # monitoring
   #   monitoring_interval = 60 # every 60s
   #   monitoring_role_arn = aws_iam_role.rds_assume_role.arn
 
   tags = {
-    Name = local.rds_postgres_identifier
+    Name = local.rds_name
   }
 
   # depends_on = [
