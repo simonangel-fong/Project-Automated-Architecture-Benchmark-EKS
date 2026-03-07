@@ -8,4 +8,4 @@ echo "# Delete K8s Resource"
 echo "# #################################"
 echo
 
-kubectl delete -f manifest/backend/$ARCH/05_ingress.yaml --ignore-not-found
+kubectl delete -f manifest/backend/$ARCH/06_ingress.yaml --ignore-not-found
