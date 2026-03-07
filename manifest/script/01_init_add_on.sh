@@ -70,6 +70,8 @@ echo "# #################################"
 echo
 
 kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+kubectl rollout status deployment aws-load-balancer-controller -n kube-system
+
 helm registry logout public.ecr.aws
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --namespace kube-system \
