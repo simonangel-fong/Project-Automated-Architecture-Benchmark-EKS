@@ -151,9 +151,10 @@ jobs:
                       ${{ env.TF_DIR }}/tfplan-destroy.json
                   retention-days: 3
 
-            - name: Destroy - Terraform Apply
-              working-directory: ${{ env.TF_DIR }}
-              run: terraform apply -auto-approve -no-color tfplan-destroy
+            - name: Remove 
+              run: |
+                  bash manifest/script/99_destroy.sh
+
             - name: Destroy - Terraform Apply
               working-directory: ${{ env.TF_DIR }}
               run: terraform apply -auto-approve -no-color tfplan-destroy
