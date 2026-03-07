@@ -25,7 +25,7 @@ jobs:
       matrix:
         solution:
           - arch: baseline
-          - arch: scale
+          # - arch: scale
           # - arch: redis
           # - arch: kafka
     with:
