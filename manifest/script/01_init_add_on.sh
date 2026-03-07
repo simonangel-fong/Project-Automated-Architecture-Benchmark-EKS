@@ -55,10 +55,11 @@ helm upgrade --install  external-dns external-dns           \
     --set sources[0]=ingress                \
     --set policy=sync                       \
     --set registry=txt                      \
+    --set txtOwnerId="${CLUSTER_NAME}"      \
+    --set domainFilters[0]=arguswatcher.net \
     --set env[0].name=CF_API_TOKEN          \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
-    --set env[0].valueFrom.secretKeyRef.key=apiKey      \
-    --set domainFilters[0]=arguswatcher.net 
+    --set env[0].valueFrom.secretKeyRef.key=apiKey  
 
 sleep 10
 
