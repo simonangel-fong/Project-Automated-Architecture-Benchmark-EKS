@@ -1,19 +1,20 @@
 # aws_msk_iam.tf
 
 locals {
+  role_name_msk_fastapi        = "${local.msk_name}-msk-fastapi"
+  role_name_msk_topic_admin    = "${local.msk_name}-msk-topic-admin"
+  role_name_msk_redis_outbox   = "${local.msk_name}-msk-redis-outbox"
+  role_name_msk_kafka_consumer = "${local.msk_name}-msk-kafka-consumer"
+
+  eks_oidc_provider_host = module.eks.oidc_provider
   msk_cluster_arn_suffix = replace(
     aws_msk_cluster.kafka.arn,
     "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/",
     ""
   )
 
-  eks_oidc_provider_host = module.eks.oidc_provider
-  kafka_topic_name       = var.kafka_topic
-
-  role_name_msk_fastapi      = "${local.msk_name}-msk-fastapi"
-  role_name_msk_topic_admin  = "${local.msk_name}-msk-topic-admin"
-  role_name_msk_redis_outbox = "${local.msk_name}-msk-redis-outbox"
-
+  kafka_topic_name = var.kafka_topic
+  kafka_group_id   = "telemetry-consumer"
 }
 
 #################################
@@ -168,7 +169,7 @@ resource "aws_iam_role" "msk-redis-outbox" {
         Condition = {
           StringEquals = {
             "${local.eks_oidc_provider_host}:aud" = "sts.amazonaws.com"
-            "${local.eks_oidc_provider_host}:sub" = "system:serviceaccount:backend:msk-redis-outbox"
+            "${local.eks_oidc_provider_host}:sub" = "system:serviceaccount:outbox:msk-redis-outbox"
           }
         }
       }
@@ -212,4 +213,78 @@ resource "aws_iam_policy" "msk-redis-outbox" {
 resource "aws_iam_role_policy_attachment" "msk-redis-outbox" {
   role       = aws_iam_role.msk-redis-outbox.name
   policy_arn = aws_iam_policy.msk-redis-outbox.arn
+}
+#################################
+# IAM role: Kafka Consumer (IRSA)
+#################################
+resource "aws_iam_role" "msk_kafka_consumer" {
+  name = local.role_name_msk_kafka_consumer
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowIrsaForKafkaConsumerServiceAccount"
+        Effect = "Allow"
+        Principal = {
+          Federated = module.eks.oidc_provider_arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${module.eks.oidc_provider}:aud" = "sts.amazonaws.com"
+            "${module.eks.oidc_provider}:sub" = "system:serviceaccount:consumer:msk-kafka-consumer" # ns: consumer
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "msk_kafka_consumer" {
+  name = local.role_name_msk_kafka_consumer
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ClusterConnect"
+        Effect = "Allow"
+        Action = [
+          "kafka-cluster:Connect",
+          "kafka-cluster:DescribeCluster"
+        ]
+        Resource = [
+          aws_msk_cluster.kafka.arn
+        ]
+      },
+      {
+        Sid    = "ReadTopic"
+        Effect = "Allow"
+        Action = [
+          "kafka-cluster:DescribeTopic",
+          "kafka-cluster:ReadData"
+        ]
+        Resource = [
+          "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic/${local.msk_cluster_arn_suffix}/${local.kafka_topic_name}"
+        ]
+      },
+      {
+        Sid    = "ConsumerGroupAccess"
+        Effect = "Allow"
+        Action = [
+          "kafka-cluster:DescribeGroup",
+          "kafka-cluster:AlterGroup"
+        ]
+        Resource = [
+          "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:group/${local.msk_cluster_arn_suffix}/${local.kafka_group_id}"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "msk_kafka_consumer" {
+  role       = aws_iam_role.msk_kafka_consumer.name
+  policy_arn = aws_iam_policy.msk_kafka_consumer.arn
 }

@@ -9,7 +9,7 @@
 
 ---
 
-## App 
+## App
 
 - Init
 
@@ -21,7 +21,6 @@ docker tag msk-topic-admin 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-
 # push to docker
 docker push 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:msk-topic-admin
 ```
-
 
 ---
 

@@ -1,18 +1,92 @@
-# app_fastapi.yaml
+# namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outbox
 ---
+# external secret
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: app-cred
+  namespace: outbox
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-global
+    kind: ClusterSecretStore
+  target:
+    name: app-cred
+    creationPolicy: Owner
+  data:
+    - secretKey: POSTGRES__HOST
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_host
+    - secretKey: POSTGRES__PORT
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_port
+    - secretKey: POSTGRES__DB
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_dbname
+    - secretKey: POSTGRES__USER
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_username
+    - secretKey: POSTGRES__PASSWORD
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_password
+    - secretKey: FLYWAY_URL
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: flyway_url
+    - secretKey: APP_USER_PASSWORD
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_app_pwd
+    - secretKey: APP_READONLY_PASSWORD
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_readonly_pwd
+    - secretKey: REDIS__HOST
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: redis_host
+    - secretKey: REDIS__PORT
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: redis_port
+    - secretKey: KAFKA__USE_MSK_AUTH
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: kafka_use_msk_auth
+    - secretKey: KAFKA__BOOTSTRAP_SERVERS
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: kafka_bootstrap_servers
+    - secretKey: KAFKA__TOPIC
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: kafka_topic
+---
+# sa
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: msk-redis-outbox
-  namespace: backend
+  namespace: outbox
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::099139718958:role/eks-benchmark-kafka-msk-redis-outbox
 ---
+# deploy
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-outbox
-  namespace: backend
+  namespace: outbox
   labels:
     app.kubernetes.io/name: redis-outbox
     app.kubernetes.io/part-of: eks-benchmark
@@ -89,3 +163,42 @@ spec:
             limits:
               cpu: "512m"
               memory: "512Mi"
+---
+# hpa
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: redis-outbox-hpa
+  namespace: outbox
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: redis-outbox
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+      selectPolicy: Max
