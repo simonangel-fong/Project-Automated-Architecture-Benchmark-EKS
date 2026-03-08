@@ -1,0 +1,178 @@
+# app_fastapi.yaml
+
+# configMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastapi-config
+  namespace: backend
+data:
+  PROJECT: "eks-benchmark"
+  ENV: "scale"
+  # DEBUG: "false" 
+  DEBUG: "true" 
+  LOG_LEVEL: "info"
+  POOL_SIZE: "5"
+  MAX_OVERFLOW: "0"
+  WORKER: "1"
+---
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: fastapi
+    app.kubernetes.io/part-of: eks-benchmark
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fastapi
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fastapi
+        app.kubernetes.io/part-of: eks-benchmark
+        app.kubernetes.io/component: api
+      annotations:
+        kubernetes.io/change-cause: "fastapi deploy"
+    spec:
+      terminationGracePeriodSeconds: 45
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: fastapi
+
+      containers:
+        - name: fastapi
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:fastapi-kafka
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+
+          # env from configmap
+          envFrom:
+            - configMapRef:
+                name: fastapi-config
+
+          # env from eso secret
+          env:
+            - name: POSTGRES__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__HOST
+            - name: POSTGRES__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PORT
+            - name: POSTGRES__DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__DB
+            - name: POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__USER
+            - name: POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PASSWORD
+            - name: REDIS__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: REDIS__HOST
+            - name: REDIS__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: REDIS__PORT
+
+          # startup
+          startupProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30   # ~150s max startup
+
+          # health check
+          readinessProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+            initialDelaySeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+            initialDelaySeconds: 30
+
+          lifecycle:
+            preStop:  # time before stop,
+              exec:
+                command: ["sh", "-c", "sleep 20"]
+
+          resources:
+            requests:
+              cpu: "1024m"
+              memory: "1024Mi"
+            limits:
+              cpu: "1024m"
+              memory: "1024Mi"
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: fastapi
+spec:
+  selector:
+    app.kubernetes.io/name: fastapi
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fastapi-pdb
+  namespace: backend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fastapi
