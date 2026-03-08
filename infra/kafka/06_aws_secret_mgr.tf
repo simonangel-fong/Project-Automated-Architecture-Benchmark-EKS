@@ -30,8 +30,8 @@ resource "aws_secretsmanager_secret_version" "app" {
     db_readonly_pwd         = var.db_readonly_pwd
     redis_host              = aws_elasticache_replication_group.redis.primary_endpoint_address
     redis_port              = aws_elasticache_replication_group.redis.port
-    kafka_use_msk_auth      = aws_msk_cluster.kafka.bootstrap_brokers_sasl_iam
-    kafka_bootstrap_servers = true
+    kafka_use_msk_auth      = true
+    kafka_bootstrap_servers = aws_msk_cluster.kafka.bootstrap_brokers_sasl_iam
     kafka_topic             = var.kafka_topic
   })
 }

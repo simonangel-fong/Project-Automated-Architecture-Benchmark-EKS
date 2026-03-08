@@ -27,6 +27,11 @@ terraform -chdir=infra/kafka apply -destroy -auto-approve
 # add kubeconfig
 # #################################
 aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-kafka
+
+# #################################
+# Init kafka
+# #################################
+kubectl apply -f manifest/job/kafka.yaml
 ```
 
 ---

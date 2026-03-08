@@ -109,22 +109,19 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter --name
 # #################################
 # Init backend
 # #################################
-kubectl apply -f manifest/backend_scale/01_ns.yaml
-kubectl apply -f manifest/backend_scale/02_karpenter.yaml
-kubectl apply -f manifest/backend_scale/03_external_secrets.yaml
-kubectl apply -f manifest/backend_scale/04_app_fastapi.yaml
-kubectl apply -f manifest/backend_scale/05_ingress.yaml
-kubectl apply -f manifest/backend_scale/06_hpa.yaml
+kubectl apply -f manifest/backend/$ARCH/01_ns.yaml
+kubectl apply -f manifest/backend/$ARCH/02_karpenter.yaml
+kubectl apply -f manifest/backend/$ARCH/03_external_secrets.yaml
+kubectl apply -f manifest/backend/$ARCH/04_app_fastapi.yaml
+kubectl apply -f manifest/backend/$ARCH/05_hpa.yaml
+kubectl apply -f manifest/backend/$ARCH/06_ingress.yaml
 
 # #################################
 # Init rds
 # #################################
 kubectl apply -f manifest/job/flyway.yaml
 
-# #################################
-# Init kafka
-# #################################
-kubectl apply -f manifest/job/kafka.yaml
+
 ```
 
 ### Using Shell Script
