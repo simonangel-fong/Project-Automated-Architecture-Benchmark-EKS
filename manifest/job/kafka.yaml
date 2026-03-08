@@ -1,5 +1,11 @@
-
-# configMap
+# kafka init job
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: msk-topic-admin
+  namespace: backend
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::099139718958:role/eks-benchmark-kafka-msk-topic-admin
 ---
 apiVersion: batch/v1
 kind: Job
@@ -11,7 +17,7 @@ spec:
   backoffLimit: 2
   template:
     spec:
-      serviceAccountName: fastapi-msk # sa for msk
+      serviceAccountName: msk-topic-admin # sa for msk
       restartPolicy: Never
       containers:
         - name: init-kafka-topic
@@ -23,11 +29,6 @@ spec:
             limits:
               cpu: "512m"
               memory: "512Mi"
-
-          # env from configmap
-          envFrom:
-            - configMapRef:
-                name: init-kafka-config
 
           env:
             - name: BOOTSTRAP_SERVERS

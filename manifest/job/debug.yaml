@@ -8,10 +8,6 @@ spec:
     - name: busybox
       image: busybox
       command: ["/bin/sh", "-c", "sleep 3000"]
-      # env from configmap
-      envFrom:
-        - configMapRef:
-            name: init-kafka-config
 
       env:
         - name: BOOTSTRAP_SERVERS
@@ -19,3 +15,8 @@ spec:
             secretKeyRef:
               name: app-cred
               key: KAFKA__BOOTSTRAP_SERVERS
+        - name: TOPIC_NAME
+          valueFrom:
+            secretKeyRef:
+              name: app-cred
+              key: KAFKA__TOPIC

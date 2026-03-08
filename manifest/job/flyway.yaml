@@ -5,7 +5,7 @@ metadata:
   namespace: backend
 spec:
   backoffLimit: 3
-  ttlSecondsAfterFinished: 3600   # auto-cleanup after 1 hour
+  ttlSecondsAfterFinished: 600   # auto-cleanup after 1 hour
   template:
     spec:
       restartPolicy: Never

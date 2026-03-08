@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: msk-kafka-comsumer
+  namespace: backend
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::099139718958:role/eks-benchmark-kafka-msk-kafka-comsumer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-consumer-config
+  namespace: backend
+data:
+  APP_NAME: "eks-benchmark"
+  ENV: "kafka"
+  DEBUG: "true"
+  AWS_REGION: "ca-central-1"
+  POOL_SIZE: "5"
+  MAX_OVERFLOW: "0"
+  KAFKA__USE_MSK_AUTH: "true"
+  KAFKA__GROUP_ID: "telemetry-consumer-group"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: kafka-consumer
+    app.kubernetes.io/part-of: eks-benchmark
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-consumer
+        app.kubernetes.io/part-of: eks-benchmark
+        app.kubernetes.io/component: worker
+      annotations:
+        kubernetes.io/change-cause: "kafka-consumer deploy"
+    spec:
+      serviceAccountName: msk-kafka-comsumer
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: kafka-consumer
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:kafka-consumer
+          imagePullPolicy: Always
+
+          envFrom:
+            - configMapRef:
+                name: kafka-consumer-config
+
+          env:
+            - name: POSTGRES__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__HOST
+            - name: POSTGRES__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PORT
+            - name: POSTGRES__DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__DB
+            - name: POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__USER
+            - name: POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PASSWORD
+            - name: KAFKA__BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__BOOTSTRAP_SERVERS
+            - name: KAFKA__TOPIC
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__TOPIC
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
