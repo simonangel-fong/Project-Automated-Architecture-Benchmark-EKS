@@ -1,0 +1,46 @@
+
+# configMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-kafka-config
+  namespace: backend
+data:
+  PARTITIONS: "3"
+  REPLICATION_FACTOR: "3"
+  TOPIC_NAME: "telemetry"
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-kafka
+  namespace: backend
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600   # auto-cleanup after 1 hour
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: init-kafka
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:kafka-init
+          resources:
+            requests:
+              cpu: "512m"
+              memory: "512Mi"
+            limits:
+              cpu: "512m"
+              memory: "512Mi"
+
+          # env from configmap
+          envFrom:
+            - configMapRef:
+                name: init-kafka-config
+
+          env:
+            - name: BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__BOOTSTRAP_SERVERS

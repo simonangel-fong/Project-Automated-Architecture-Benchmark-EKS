@@ -119,6 +119,29 @@ variable "redis_node_type" {
 }
 
 # ##############################
+# AWS MSK
+# ##############################
+variable "kafka_topic" {
+  type    = string
+  default = "telemetry"
+}
+
+variable "kafka_instance_type" {
+  type    = string
+  default = "kafka.t3.small"
+}
+
+variable "kafka_volume_size" {
+  type    = number
+  default = 20
+}
+
+variable "kafka_broker_count" {
+  type    = number
+  default = 3
+}
+
+# ##############################
 # AWS Cloudfront
 # ##############################
 variable "domain_name" {

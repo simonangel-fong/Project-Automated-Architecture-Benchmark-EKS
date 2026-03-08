@@ -107,6 +107,21 @@ spec:
                 secretKeyRef:
                   name: app-cred
                   key: REDIS__PORT
+            - name: KAFKA__USE_MSK_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__USE_MSK_AUTH
+            - name: KAFKA__BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__BOOTSTRAP_SERVERS
+            - name: KAFKA__TOPIC
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__TOPIC
 
           # startup
           startupProbe:

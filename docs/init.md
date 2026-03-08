@@ -121,6 +121,10 @@ kubectl apply -f manifest/backend_scale/06_hpa.yaml
 # #################################
 kubectl apply -f manifest/job/flyway.yaml
 
+# #################################
+# Init kafka
+# #################################
+kubectl apply -f manifest/job/kafka.yaml
 ```
 
 ### Using Shell Script
