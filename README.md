@@ -8,6 +8,7 @@ One Pipeline. Four Designs. Real Metrics.
 ## Project Overview
 
 - [Baseline](./docs/baseline.md)
+- [Kafka](./docs/kafka.md)
 - [Init Kubernetes](./docs/init.md)
   - [External Secret Operator](./docs/eso.md)
   - [AWS Load Balancer Controller](./docs/lbc.md)

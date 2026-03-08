@@ -16,6 +16,12 @@ data:
   MAX_OVERFLOW: "0"
   WORKER: "1"
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fastapi-msk
+  namespace: backend
+---
 # deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -47,6 +53,7 @@ spec:
       annotations:
         kubernetes.io/change-cause: "fastapi deploy"
     spec:
+      serviceAccountName: fastapi-msk # sa for msk
       terminationGracePeriodSeconds: 45
       topologySpreadConstraints:
         - maxSkew: 1
@@ -58,7 +65,7 @@ spec:
 
       containers:
         - name: fastapi
-          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:fastapi-kafka
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:msk-topic-admin
           imagePullPolicy: Always
           ports:
             - name: http

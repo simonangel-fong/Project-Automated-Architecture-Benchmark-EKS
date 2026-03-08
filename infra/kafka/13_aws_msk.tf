@@ -120,3 +120,59 @@ resource "aws_msk_cluster" "kafka" {
     Name = local.msk_name
   }
 }
+
+
+# resource "aws_iam_policy" "kafka_access" {
+#   name = "${var.project_name}-${var.arch}-kafka-access"
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "kafka-cluster:Connect",
+#           "kafka-cluster:DescribeCluster",
+#           "kafka-cluster:DescribeTopic",
+#           "kafka-cluster:CreateTopic",
+#           "kafka-cluster:WriteData",
+#           "kafka-cluster:ReadData"
+#         ]
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
+
+# resource "aws_iam_role" "fastapi_kafka" {
+#   name = "${var.project_name}-${var.arch}-fastapi-kafka"
+
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Principal = {
+#           Service = "pods.eks.amazonaws.com"
+#         }
+#         Action = "sts:AssumeRole"
+#       }
+#     ]
+#   })
+# }
+
+# resource "aws_iam_role_policy_attachment" "fastapi_kafka" {
+#   role       = aws_iam_role.fastapi_kafka.name
+#   policy_arn = aws_iam_policy.kafka_access.arn
+# }
+
+# resource "aws_eks_pod_identity_association" "fastapi" {
+#   cluster_name    = module.eks.cluster_name
+#   namespace       = "backend"
+#   service_account = "fastapi"
+
+#   role_arn = aws_iam_role.fastapi_kafka.arn
+# }
+
+
+

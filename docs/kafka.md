@@ -3,8 +3,25 @@
 [Back](../README.md)
 
 - [Architecture - Kafka](#architecture---kafka)
+  - [App](#app)
   - [AWS Init](#aws-init)
   - [Test](#test)
+
+---
+
+## App 
+
+- Init
+
+```sh
+# build
+docker build -t msk-topic-admin app/kafka/init
+# tag
+docker tag msk-topic-admin 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:msk-topic-admin
+# push to docker
+docker push 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:msk-topic-admin
+```
+
 
 ---
 
