@@ -12,7 +12,7 @@ concurrency:
 jobs:
 
   destroy:
-    name: Destroy Resources
+    name: Destroy
     uses: ./.github/workflows/job_destroy.yaml
     permissions:
       contents: read

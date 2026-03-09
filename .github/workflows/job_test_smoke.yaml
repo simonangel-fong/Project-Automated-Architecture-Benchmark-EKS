@@ -15,7 +15,7 @@ on:
 
 jobs:
   testing-smoke:
-    name: Smoke Testing
+    name: ${{ inputs.arch }} Smoke Testing
     runs-on: ubuntu-latest
     env:
       ENV: ${{ inputs.arch }}
