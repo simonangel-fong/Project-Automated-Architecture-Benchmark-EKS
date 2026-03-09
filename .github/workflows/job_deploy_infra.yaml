@@ -41,10 +41,7 @@ on:
                 description: "AWS bucket for tf remote backend"
             cluster_admin_arn:
                 description: "AWS arn for EKS cluster admin"
-        # outputs:
-        #     base_url:
-        #         description: "A description of the output"
-        #         value: ${{ jobs.deploy.outputs.base_url }}
+
 jobs:
     deploy_infra:
         name: ${{ inputs.arch }}-AWS-Deployment
