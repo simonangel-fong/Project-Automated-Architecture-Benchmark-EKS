@@ -16,6 +16,10 @@ on:
                 description: "AWS region"
                 type: string
                 default: "ca-central-1"
+            test_version:
+                description: "Test version"
+                type: string
+                default: "0.1"
         secrets:
             db_name:
                 description: "Database name"
@@ -35,6 +39,9 @@ on:
                 description: "AWS role for github actions"
             aws_backend_bucket:
                 description: "AWS bucket for tf remote backend"
+            cluster_admin_arn:
+                description: "AWS arn for EKS cluster admin"
+                
 jobs:
     destroy_k8s:
         name: Destroy K8s ${{ inputs.arch }}

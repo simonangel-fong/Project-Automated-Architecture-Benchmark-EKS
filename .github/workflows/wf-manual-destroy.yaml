@@ -29,6 +29,7 @@ jobs:
       project: ${{ vars.PROJECT}}
       arch: ${{ matrix.solution.arch }}
       aws_region: ${{ vars.AWS_REGION }}
+      test_version: ${{ vars.TEST_VERSION }}
     secrets:
       db_name: ${{ secrets.DB_NAME }}
       db_username: ${{ secrets.DB_USERNAME }}
@@ -39,3 +40,4 @@ jobs:
       cf_zone_id: ${{ secrets.CF_ZONE_ID }}
       aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
       aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
+      cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}
