@@ -12,7 +12,8 @@ locals {
     }
     github_cicd = {
       principal_arn = var.github_cicd_role_arn
-      policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+      # policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+      policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
       scope         = "cluster"
       namespaces    = []
       description   = "CI/CD App pipeline: Helm add-ons and application deployments"
