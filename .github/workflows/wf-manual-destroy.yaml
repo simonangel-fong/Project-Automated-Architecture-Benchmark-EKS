@@ -1,5 +1,5 @@
 # .github/workflow/wf-manual-destroy.yaml
-name: Workflow-Manaual Destroy
+name: Workflow Manaual Destroy
 
 on:
     workflow_dispatch:
@@ -21,10 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         solution:
-          - arch: baseline
-          - arch: scale
+          # - arch: baseline
+          # - arch: scale
           # - arch: redis
-          # - arch: kafka
+          - arch: kafka
     with:
       project: ${{ vars.PROJECT}}
       arch: ${{ matrix.solution.arch }}
@@ -37,5 +37,5 @@ jobs:
       db_readonly_pwd: ${{ secrets.DB_READONLY_PWD }}
       cf_api_token: ${{ secrets.CF_API_TOKEN }}
       cf_zone_id: ${{ secrets.CF_ZONE_ID }}
-      aws_tf_role_arn: ${{ secrets.AWS_TF_ROLE_ARN }}
+      aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
       aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
