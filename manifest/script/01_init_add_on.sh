@@ -1,4 +1,4 @@
-# manifest/init.sh
+# 01_init_add_on.sh
 #!/bin/bash
 
 set -Eeuo pipefail
@@ -19,6 +19,11 @@ helm upgrade --install  external-secrets external-secrets   \
 
 kubectl -n external-secrets annotate sa external-secrets eks.amazonaws.com/role-arn="$IAM_ESO_ROLE_ARN" --overwrite
 
+# wait for rollout
+kubectl rollout status deployment/external-secrets -n external-secrets --timeout=10m
+kubectl rollout status deployment/external-secrets-cert-controller -n external-secrets --timeout=10m
+kubectl rollout status deployment/external-secrets-webhook  -n external-secrets --timeout=10m
+
 echo
 echo "# #################################"
 echo "# Setup external albc"
@@ -33,7 +38,8 @@ helm upgrade --install  aws-load-balancer-controller aws-load-balancer-controlle
     --set serviceAccount.name=aws-load-balancer-controller      \
     --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=$IAM_LBC_ROLE_ARN
 
-sleep 20
+# rollout
+kubectl rollout status deployment/aws-load-balancer-controller -n kube-system --timeout=10m
 
 echo
 echo "# #################################"
@@ -61,7 +67,8 @@ helm upgrade --install  external-dns external-dns           \
     --set env[0].valueFrom.secretKeyRef.name=cloudflare-api-key     \
     --set env[0].valueFrom.secretKeyRef.key=apiKey  
 
-sleep 20
+# rollout
+kubectl rollout status deployment/external-dns -n external-dns --timeout=10m
 
 echo
 echo "# #################################"
@@ -69,8 +76,8 @@ echo "# Setup Karpenter"
 echo "# #################################"
 echo
 
+# rollout
 kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
-kubectl rollout status deployment aws-load-balancer-controller -n kube-system
 
 helm registry logout public.ecr.aws
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
@@ -78,12 +85,10 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --version "1.9.0" \
   --set settings.clusterName="${CLUSTER_NAME}" \
   --set settings.interruptionQueue="${QUEUE_NAME}" \
-  --set webhook.enabled=true    \
-  --debug
-#   --wait \
-#   --timeout 10m \
+  --set webhook.enabled=true    
 
-sleep 10
+# rollout
+kubectl rollout status deployment/karpenter -n kube-system --timeout=10m
 
 echo
 echo "# #################################"

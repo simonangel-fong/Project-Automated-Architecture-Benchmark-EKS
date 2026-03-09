@@ -1,32 +1,43 @@
-# manifest/init.sh
+# 02_init_deploy_backend
 #!/bin/bash
 
 set -Eeuo pipefail
 
-# rollout
-kubectl rollout status deployment/aws-load-balancer-controller -n kube-system --timeout=10m
-
-# Check if lbc ready
-for i in {1..60}; do
-  EP=$(kubectl get endpoints -n kube-system aws-load-balancer-webhook-service -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)
-  if [ -n "$EP" ]; then
-    echo "Webhook endpoints ready: $EP"
-    break
-  fi
-  echo "Waiting for aws-load-balancer-webhook-service endpoints..."
-  sleep 5
-done
-
 echo
 echo "# #################################"
-echo "#  Apply Application"
+echo "#  Deploy Application"
 echo "# #################################"
 echo
 
-kubectl create -f manifest/backend/$ARCH/01_ns.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/01_ns.yaml
-kubectl create -f manifest/backend/$ARCH/02_karpenter.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/02_karpenter.yaml
-kubectl create -f manifest/backend/$ARCH/03_external_secrets.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/03_external_secrets.yaml
-kubectl create -f manifest/backend/$ARCH/04_app_fastapi.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/04_app_fastapi.yaml
-kubectl create -f manifest/backend/$ARCH/05_hpa.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/05_hpa.yaml
-kubectl create -f manifest/backend/$ARCH/06_ingress.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/06_ingress.yaml
+kubectl create -f manifest/backend/$ARCH/01_karpenter.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/01_karpenter.yaml
+kubectl create -f manifest/backend/$ARCH/02_cluster_secret_store.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/02_cluster_secret_store.yaml
+kubectl create -f manifest/backend/$ARCH/03_app_fastapi.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/03_app_fastapi.yaml
 
+if [[ "$ARCH" == "kafka" ]]; then
+  kubectl create -f manifest/backend/$ARCH/04_app_kafka_comsumer.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/04_app_kafka_comsumer.yaml
+  kubectl create -f manifest/backend/$ARCH/05_app_outbox.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/05_app_outbox.yaml
+fi
+
+# ingress
+kubectl create -f manifest/backend/$ARCH/99_ingress.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/99_ingress.yaml
+
+########################################
+echo
+echo "# #################################"
+echo "#  Init PGDB"
+echo "# #################################"
+echo
+
+kubectl create -f manifest/job/flyway.yaml 2>/dev/null || kubectl replace -f manifest/job/flyway.yaml
+
+########################################
+
+if [[ "$ARCH" == "kafka" ]]; then
+  echo
+  echo "# #################################"
+  echo "#  Init Kafka"
+  echo "# #################################"
+  echo
+
+  kubectl create -f manifest/job/kafka.yaml 2>/dev/null || kubectl replace -f manifest/job/kafka.yaml
+fi
