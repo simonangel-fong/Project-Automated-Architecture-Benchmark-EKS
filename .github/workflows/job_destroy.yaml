@@ -96,7 +96,7 @@ jobs:
             TF_VAR_cloudflare_zone_id: ${{ secrets.cf_zone_id }}
             TF_VAR_cluster_admin_arn: ${{ secrets.cluster_admin_arn }}
             TF_VAR_github_cicd_role_arn: ${{ secrets.aws_github_action_role_arn }}
-            TF_VAR_test_version: ${{ secrets.test_version }}
+            TF_VAR_test_version: ${{ inputs.test_version }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
