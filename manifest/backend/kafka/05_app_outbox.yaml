@@ -164,41 +164,41 @@ spec:
               cpu: "512m"
               memory: "512Mi"
 ---
-# hpa
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: redis-outbox-hpa
-  namespace: outbox
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: redis-outbox
-  minReplicas: 1
-  maxReplicas: 4
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 60
-  behavior:
-    scaleUp:
-      stabilizationWindowSeconds: 0
-      policies:
-        - type: Percent
-          value: 100
-          periodSeconds: 30
-        - type: Pods
-          value: 2
-          periodSeconds: 30
-      selectPolicy: Max
-    scaleDown:
-      stabilizationWindowSeconds: 60
-      policies:
-        - type: Percent
-          value: 25
-          periodSeconds: 60
-      selectPolicy: Max
+# # hpa
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: redis-outbox-hpa
+#   namespace: outbox
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: redis-outbox
+#   minReplicas: 1
+#   maxReplicas: 4
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 60
+#   behavior:
+#     scaleUp:
+#       stabilizationWindowSeconds: 0
+#       policies:
+#         - type: Percent
+#           value: 100
+#           periodSeconds: 30
+#         - type: Pods
+#           value: 2
+#           periodSeconds: 30
+#       selectPolicy: Max
+#     scaleDown:
+#       stabilizationWindowSeconds: 60
+#       policies:
+#         - type: Percent
+#           value: 25
+#           periodSeconds: 60
+#       selectPolicy: Max
