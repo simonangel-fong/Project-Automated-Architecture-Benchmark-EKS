@@ -48,6 +48,7 @@ output "export_env" {
 
     export IAM_ESO_ROLE_ARN="${aws_iam_role.eso.arn}"
     export IAM_LBC_ROLE_ARN="${aws_iam_role.lbc.arn}"
+    export CF_TOKEN="${var.cloudflare_api_token}"
 
     aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}
 

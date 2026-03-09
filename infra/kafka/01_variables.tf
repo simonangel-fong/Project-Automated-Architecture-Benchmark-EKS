@@ -1,4 +1,4 @@
-# baseline/variables.tf
+# variables.tf
 # ##############################
 # Project
 # ##############################
@@ -17,7 +17,6 @@ variable "arch" {
 variable "test_version" {
   type = string
 }
-
 
 # ##############################
 # AWS

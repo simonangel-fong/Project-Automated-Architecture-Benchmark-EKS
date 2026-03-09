@@ -11,17 +11,27 @@ echo "#  Deploy Application"
 echo "# #################################"
 echo
 
-kubectl create -f manifest/backend/$ARCH/01_karpenter.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/01_karpenter.yaml
-kubectl create -f manifest/backend/$ARCH/02_cluster_secret_store.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/02_cluster_secret_store.yaml
-kubectl create -f manifest/backend/$ARCH/03_app_fastapi.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/03_app_fastapi.yaml
+kubectl delete -f manifest/backend/$ARCH/01_karpenter.yaml --ignore-not-found
+kubectl apply -f manifest/backend/$ARCH/01_karpenter.yaml
+
+kubectl delete -f manifest/backend/$ARCH/02_cluster_secret_store.yaml --ignore-not-found
+kubectl apply -f manifest/backend/$ARCH/02_cluster_secret_store.yaml
+
+kubectl delete -f manifest/backend/$ARCH/03_app_fastapi.yaml --ignore-not-found
+kubectl apply -f manifest/backend/$ARCH/03_app_fastapi.yaml
+
 
 if [[ "$ARCH" == "kafka" ]]; then
-  kubectl create -f manifest/backend/$ARCH/04_app_kafka_comsumer.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/04_app_kafka_comsumer.yaml
-  kubectl create -f manifest/backend/$ARCH/05_app_outbox.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/05_app_outbox.yaml
+  kubectl delete -f manifest/backend/$ARCH/04_app_kafka_comsumer.yaml --ignore-not-found
+  kubectl apply -f manifest/backend/$ARCH/04_app_kafka_comsumer.yaml
+
+  kubectl delete -f manifest/backend/$ARCH/05_app_outbox.yaml --ignore-not-found
+  kubectl apply -f manifest/backend/$ARCH/05_app_outbox.yaml
 fi
 
 # ingress
-kubectl create -f manifest/backend/$ARCH/99_ingress.yaml 2>/dev/null || kubectl replace -f manifest/backend/$ARCH/99_ingress.yaml
+kubectl delete -f manifest/backend/$ARCH/99_ingress.yaml --ignore-not-found
+kubectl apply -f manifest/backend/$ARCH/99_ingress.yaml
 
 ########################################
 echo
@@ -30,7 +40,8 @@ echo "#  Init PGDB"
 echo "# #################################"
 echo
 
-kubectl create -f manifest/job/flyway.yaml 2>/dev/null || kubectl replace -f manifest/job/flyway.yaml
+kubectl delete -f manifest/job/flyway.yaml --ignore-not-found
+kubectl apply -f manifest/job/flyway.yaml
 
 ########################################
 
@@ -41,5 +52,6 @@ if [[ "$ARCH" == "kafka" ]]; then
   echo "# #################################"
   echo
 
-  kubectl create -f manifest/job/kafka.yaml 2>/dev/null || kubectl replace -f manifest/job/kafka.yaml
+  kubectl delete -f manifest/job/kafka.yaml --ignore-not-found
+  kubectl apply -f manifest/job/kafka.yaml
 fi

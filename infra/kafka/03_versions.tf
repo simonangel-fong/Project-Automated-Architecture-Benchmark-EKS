@@ -1,4 +1,4 @@
-# baseline/versions.tf
+# versions.tf
 terraform {
   required_version = ">= 1.9.8"
 

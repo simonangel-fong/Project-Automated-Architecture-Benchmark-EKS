@@ -8,7 +8,6 @@
 # #################################
 locals {
   redis_name = "${var.project_name}-${var.arch}"
-  redis_port = 6379
 }
 
 # #################################
@@ -22,8 +21,8 @@ resource "aws_security_group" "redis" {
   # Allow Redis traffic from FastAPI ECS tasks
   ingress {
     description     = "Redis from FastAPI service"
-    from_port       = local.redis_port
-    to_port         = local.redis_port
+    from_port       = 6379
+    to_port         = 6379
     protocol        = "tcp"
     security_groups = [module.eks.node_security_group_id]
   }
@@ -81,7 +80,7 @@ resource "aws_elasticache_replication_group" "redis" {
   engine               = "redis"
   engine_version       = "7.1"
   node_type            = var.redis_node_type
-  port                 = local.redis_port
+  port                 = 6379
 
 
   apply_immediately = true
