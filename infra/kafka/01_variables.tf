@@ -14,6 +14,11 @@ variable "arch" {
   default     = "kafka"
 }
 
+variable "test_version" {
+  type = string
+}
+
+
 # ##############################
 # AWS
 # ##############################

@@ -13,6 +13,7 @@ provider "aws" {
         Project      = var.project_name
         Architecture = var.arch
         ManagedBy    = "terraform"
+        Test-Version = var.test_version
       }
     )
   }
