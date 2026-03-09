@@ -25,9 +25,9 @@ jobs:
       matrix:
         solution:
           - arch: baseline
-          - arch: scale
-          - arch: redis
-          - arch: kafka
+          # - arch: scale
+          # - arch: redis
+          # - arch: kafka
     with:
       project: ${{ vars.PROJECT}}
       arch: ${{ matrix.solution.arch }}
