@@ -32,7 +32,7 @@ jobs:
 
           echo "Checking URL: $BASE_URL/api"
 
-          ATTEMPTS=120
+          ATTEMPTS=600
           SLEEP_SECONDS=1
           URL_READY=0
 
