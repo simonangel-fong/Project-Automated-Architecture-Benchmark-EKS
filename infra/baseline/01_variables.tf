@@ -14,6 +14,10 @@ variable "arch" {
   default     = "baseline"
 }
 
+variable "test_version" {
+  type = string
+}
+
 # ##############################
 # AWS
 # ##############################
@@ -74,6 +78,10 @@ variable "max_size" {
 variable "app_namespace" {
   type    = string
   default = "backend"
+}
+
+variable "github_cicd_role_arn" {
+  type = string
 }
 
 # ##############################
