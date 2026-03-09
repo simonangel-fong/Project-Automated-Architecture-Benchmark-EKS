@@ -31,7 +31,7 @@ on:
                 description: "Cloudflare API token"
             cf_zone_id:
                 description: "Cloudflare zone id"
-            aws_tf_role_arn:
+            aws_github_action_role_arn:
                 description: "AWS role for tf"
             aws_backend_bucket:
                 description: "AWS bucket for tf remote backend"
@@ -79,7 +79,7 @@ jobs:
             - name: Configure AWS credentials (OIDC)
               uses: aws-actions/configure-aws-credentials@v4
               with:
-                  role-to-assume: ${{ secrets.aws_tf_role_arn}}
+                  role-to-assume: ${{ secrets.aws_github_action_role_arn}}
                   aws-region: ${{ inputs.aws_region }}
 
             - name: Configure Terraform plugin cache
@@ -172,7 +172,7 @@ jobs:
             - name: Configure AWS credentials (OIDC)
               uses: aws-actions/configure-aws-credentials@v4
               with:
-                  role-to-assume: ${{ secrets.aws_tf_role_arn}}
+                  role-to-assume: ${{ secrets.aws_github_action_role_arn}}
                   aws-region: ${{ inputs.aws_region }}
 
             - name: Set up kubectl
