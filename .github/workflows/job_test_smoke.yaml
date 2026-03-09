@@ -20,8 +20,8 @@ jobs:
     env:
       ENV: ${{ inputs.arch }}
       BASE_URL: ${{ inputs.base_url }}
-      K6_REPORT: k6/report/${{ inputs.arch }}_cicd_smoke.html
-      K6_SCRIPT: k6/script/test_smoke.js
+      K6_REPORT: test/k6/report/${{ inputs.arch }}_cicd_smoke.html
+      K6_SCRIPT: test/k6/script/test_smoke.js
     steps:
       - name: Checkout
         uses: actions/checkout@v4
