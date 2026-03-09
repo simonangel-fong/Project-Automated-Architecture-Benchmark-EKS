@@ -5,8 +5,12 @@ metadata:
   namespace: backend
 spec:
   backoffLimit: 3
-  ttlSecondsAfterFinished: 600   # auto-cleanup after 1 hour
+  ttlSecondsAfterFinished: 600
   template:
+    metadata:
+      labels:
+        job-name: init-db-flyway
+        app: init-db-flyway
     spec:
       restartPolicy: Never
       containers:
