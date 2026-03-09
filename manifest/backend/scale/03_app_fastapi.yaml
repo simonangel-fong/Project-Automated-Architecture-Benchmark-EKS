@@ -1,20 +1,57 @@
 # app_fastapi.yaml
-
-# configMap
+# namespace
 apiVersion: v1
-kind: ConfigMap
+kind: Namespace
 metadata:
-  name: fastapi-config
+  name: backend
+---
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: app-cred
   namespace: backend
-data:
-  PROJECT: "eks-benchmark"
-  ENV: "scale"
-  # DEBUG: "false" 
-  DEBUG: "true" 
-  LOG_LEVEL: "info"
-  POOL_SIZE: "5"
-  MAX_OVERFLOW: "0"
-  WORKER: "1"
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-global
+    kind: ClusterSecretStore
+  target:
+    name: app-cred
+    creationPolicy: Owner
+  data:
+    - secretKey: POSTGRES__HOST
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_host
+    - secretKey: POSTGRES__PORT
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_port
+    - secretKey: POSTGRES__DB
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_dbname
+    - secretKey: POSTGRES__USER
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_username
+    - secretKey: POSTGRES__PASSWORD
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_password
+    - secretKey: FLYWAY_URL
+      remoteRef:
+        key: eks-benchmark-scale
+        property: flyway_url
+    - secretKey: APP_USER_PASSWORD
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_app_pwd
+    - secretKey: APP_READONLY_PASSWORD
+      remoteRef:
+        key: eks-benchmark-scale
+        property: db_readonly_pwd
 ---
 # deployment
 apiVersion: apps/v1
@@ -65,11 +102,6 @@ spec:
               containerPort: 8000
               protocol: TCP
 
-          # env from configmap
-          envFrom:
-            - configMapRef:
-                name: fastapi-config
-
           # env from eso secret
           env:
             - name: POSTGRES__HOST
@@ -97,7 +129,22 @@ spec:
                 secretKeyRef:
                   name: app-cred
                   key: POSTGRES__PASSWORD
-          
+            - name: PROJECT
+              value: "eks-benchmark"
+            - name: ENV
+              value: "kafka"
+            - name: DEBUG
+              # value: "true"
+              value: "false"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: POOL_SIZE
+              value: "5"
+            - name: MAX_OVERFLOW
+              value: "0"
+            - name: WORKER
+              value: "1"
+
           # startup
           startupProbe:
             httpGet:
@@ -166,3 +213,42 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: fastapi
+---
+# hpa
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: fastapi-hpa
+  namespace: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: fastapi
+  minReplicas: 1
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+        - type: Pods
+          value: 1
+          periodSeconds: 30
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+      selectPolicy: Max
