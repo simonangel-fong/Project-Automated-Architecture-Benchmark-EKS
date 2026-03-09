@@ -3,6 +3,8 @@
 
 set -Eeuo pipefail
 
+kubectl rollout status deployment/aws-load-balancer-controller -n kube-system --timeout=10m
+
 echo
 echo "# #################################"
 echo "#  Deploy Application"
