@@ -22,7 +22,7 @@ on:
         type: string
 jobs:
   testing-performance:
-    name: ${{ inputs.arch }} Performance Testing
+    name: ${{ inputs.arch }} Load Testing
     runs-on: ubuntu-latest
     env:
       ENV: ${{ inputs.arch }}
@@ -32,10 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # - name: Wait 10 min
-      #   run: |
-      #     sleep 600
 
       - name: Setup K6
         uses: grafana/setup-k6-action@v1
