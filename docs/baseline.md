@@ -4,7 +4,8 @@
 
 - [Architecture - Baseline](#architecture---baseline)
   - [AWS Init](#aws-init)
-  - [Test](#test)
+  - [Local Test](#local-test)
+  - [Grafana k6 Testing](#grafana-k6-testing)
 
 ---
 
@@ -29,7 +30,7 @@ aws eks update-kubeconfig --region ca-central-1 --name eks-benchmark-baseline
 
 ---
 
-## Test
+## Local Test
 
 ```sh
 # smoke
@@ -46,3 +47,19 @@ docker run --rm --name baseline_aws_mixed -p 5665:5665 -e SOLUTION_ID="baseline"
 ```
 
 ---
+
+## Grafana k6 Testing
+
+```sh
+# smoke
+docker run --rm --name k6_baseline_aws_smoke --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-baseline.arguswatcher.net" -e SOLUTION_ID=eks-baseline -e MAX_VU=100 -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_smoke.js
+
+# # read
+# docker run --rm --name k6_baseline_aws_smoke --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-baseline.arguswatcher.net" -e SOLUTION_ID=eks-baseline -e MAX_VU=100 -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_hp_read.js
+
+# # write
+# docker run --rm --name k6_baseline_aws_write --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-baseline.arguswatcher.net" -e SOLUTION_ID=eks-baseline -e MAX_VU=100 -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_hp_write.js
+
+# mixed
+docker run --rm --name k6_baseline_aws_mixed --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-baseline.arguswatcher.net" -e SOLUTION_ID=eks-baseline -e W_MAX_VU=50 -e R_MAX_VU=50 -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_hp_mixed.js
+```

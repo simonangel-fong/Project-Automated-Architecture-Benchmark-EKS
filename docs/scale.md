@@ -5,6 +5,7 @@
 - [Architecture - Scale](#architecture---scale)
   - [AWS Init](#aws-init)
   - [Test](#test)
+  - [Grafana k6 Testing](#grafana-k6-testing)
 
 ---
 
@@ -47,3 +48,13 @@ docker run --rm --name scale_aws_mixed -p 5666:5665 -e SOLUTION_ID="scale" -e BA
 ```
 
 ---
+
+## Grafana k6 Testing
+
+```sh
+# smoke
+docker run --rm --name k6_scale_aws_smoke --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-scale.arguswatcher.net" -e SOLUTION_ID=eks-scale -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_smoke.js
+
+# mixed
+docker run --rm --name k6_scale_aws_mixed --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-scale.arguswatcher.net" -e SOLUTION_ID=eks-scale -e W_MAX_VU=50 -e R_MAX_VU=50 -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_hp_mixed.js
+```

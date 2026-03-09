@@ -6,6 +6,7 @@
   - [App](#app)
   - [AWS Init](#aws-init)
   - [Test](#test)
+  - [Grafana k6 Testing](#grafana-k6-testing)
 
 ---
 
@@ -69,3 +70,13 @@ docker run --rm --name kafka_aws_mixed -p 5665:5665 -e SOLUTION_ID="kafka" -e BA
 ```
 
 ---
+
+## Grafana k6 Testing
+
+```sh
+# smoke
+docker run --rm --name k6_kafka_aws_smoke --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-kafka.arguswatcher.net" -e SOLUTION_ID=eks-kafka -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_smoke.js
+
+# mixed
+docker run --rm --name k6_kafka_aws_mixed --env-file ./test/k6/.env -e BASE_URL="https://eks-benchmark-kafka.arguswatcher.net" -e SOLUTION_ID=eks-kafka -e W_MAX_VU=50 -e R_MAX_VU=50 -v ./test/k6/script:/script grafana/k6 cloud run --include-system-env-vars=true /script/test_hp_mixed.js
+```
