@@ -22,55 +22,55 @@ spec:
   data:
     - secretKey: POSTGRES__HOST
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_host
     - secretKey: POSTGRES__PORT
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_port
     - secretKey: POSTGRES__DB
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_dbname
     - secretKey: POSTGRES__USER
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_username
     - secretKey: POSTGRES__PASSWORD
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_password
     - secretKey: FLYWAY_URL
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: flyway_url
     - secretKey: APP_USER_PASSWORD
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_app_pwd
     - secretKey: APP_READONLY_PASSWORD
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: db_readonly_pwd
     - secretKey: REDIS__HOST
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: redis_host
     - secretKey: REDIS__PORT
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: redis_port
     - secretKey: KAFKA__USE_MSK_AUTH
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: kafka_use_msk_auth
     - secretKey: KAFKA__BOOTSTRAP_SERVERS
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: kafka_bootstrap_servers
     - secretKey: KAFKA__TOPIC
       remoteRef:
-        key: eks-benchmark-kafka
+        key: eks-benchmark-redis
         property: kafka_topic
 ---
 # deployment
