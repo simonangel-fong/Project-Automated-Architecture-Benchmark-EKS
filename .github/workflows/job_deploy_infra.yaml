@@ -36,7 +36,7 @@ on:
             cf_zone_id:
                 description: "Cloudflare zone id"
             aws_github_action_role_arn:
-                description: "AWS role for tf"
+                description: "AWS role for github actions"
             aws_backend_bucket:
                 description: "AWS bucket for tf remote backend"
             cluster_admin_arn:
