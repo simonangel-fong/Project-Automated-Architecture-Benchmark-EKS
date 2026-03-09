@@ -196,6 +196,3 @@ jobs:
               run: |
                   bash manifest/script/02_init_deploy_backend.sh
 
-            - name: Initial RDS
-              run: |
-                  kubectl apply -f manifest/job/flyway.yaml

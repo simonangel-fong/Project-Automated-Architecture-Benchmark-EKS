@@ -76,6 +76,10 @@ variable "app_namespace" {
   default = "backend"
 }
 
+variable "github_cicd_role_arn" {
+  type = string
+}
+
 # ##############################
 # AWS RDS
 # ##############################

@@ -10,13 +10,13 @@ locals {
       namespaces    = []
       description   = "Human: daily ops and break-glass"
     }
-    # cicd_app = {
-    #   principal_arn = var.cicd_app_role_arn
-    #   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
-    #   scope         = "cluster"
-    #   namespaces    = []
-    #   description   = "CI/CD App pipeline: Helm add-ons and application deployments"
-    # }
+    github_cicd = {
+      principal_arn = var.github_cicd_role_arn
+      policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+      scope         = "cluster"
+      namespaces    = []
+      description   = "CI/CD App pipeline: Helm add-ons and application deployments"
+    }
 
     # developer = {
     #   principal_arn = var.developer_role_arn

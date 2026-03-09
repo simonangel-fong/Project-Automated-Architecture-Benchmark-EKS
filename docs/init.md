@@ -129,7 +129,6 @@ kubectl apply -f manifest/job/flyway.yaml
 ```sh
 bash manifest/script/01_init_add_on.sh
 bash manifest/script/02_init_deploy_backend.sh
-bash manifest/script/03_init_rds.sh
 ```
 
 ---
