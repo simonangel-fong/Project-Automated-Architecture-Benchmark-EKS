@@ -110,11 +110,6 @@ spec:
               containerPort: 8000
               protocol: TCP
 
-          # env from configmap
-          envFrom:
-            - configMapRef:
-                name: fastapi-config
-
           # env from eso secret
           env:
             - name: POSTGRES__HOST
