@@ -24,114 +24,114 @@ resource "aws_vpc" "main" {
   }
 }
 
-# # ##############################
-# # Internet Gateway
-# # ##############################
-# resource "aws_internet_gateway" "igw" {
-#   vpc_id = aws_vpc.main.id
+# ##############################
+# Internet Gateway
+# ##############################
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
 
-#   tags = {
-#     Name = local.vpc_name
-#   }
-# }
+  tags = {
+    Name = local.vpc_name
+  }
+}
 
-# # ##############################
-# # Public subnet
-# # ##############################
-# resource "aws_subnet" "public" {
-#   for_each = toset(local.azs)
+# ##############################
+# Public subnet
+# ##############################
+resource "aws_subnet" "public" {
+  for_each = toset(local.azs)
 
-#   vpc_id                  = aws_vpc.main.id
-#   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, index(local.azs, each.value) + 100)
-#   availability_zone       = each.value
-#   map_public_ip_on_launch = true
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, index(local.azs, each.value) + 100)
+  availability_zone       = each.value
+  map_public_ip_on_launch = true
 
-#   tags = {
-#     Name = "${local.vpc_name}-${each.value}-public-subnet"
+  tags = {
+    Name = "${local.vpc_name}-${each.value}-public-subnet"
 
-#     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-#     "kubernetes.io/role/elb"                      = "1"
-#   }
-# }
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = "1"
+  }
+}
 
-# # rt public
-# resource "aws_route_table" "public" {
-#   vpc_id = aws_vpc.main.id
+# rt public
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
 
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.igw.id
-#   }
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
 
-#   tags = {
-#     Name = "${local.vpc_name}-public"
-#   }
-# }
+  tags = {
+    Name = "${local.vpc_name}-public"
+  }
+}
 
-# # Route Table Associations: public
-# resource "aws_route_table_association" "public" {
-#   for_each       = aws_subnet.public
-#   subnet_id      = each.value.id
-#   route_table_id = aws_route_table.public.id
-# }
+# Route Table Associations: public
+resource "aws_route_table_association" "public" {
+  for_each       = aws_subnet.public
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.public.id
+}
 
-# # ##############################
-# # Private subnet
-# # ##############################
-# resource "aws_subnet" "private" {
-#   for_each = toset(local.azs)
+# ##############################
+# Private subnet
+# ##############################
+resource "aws_subnet" "private" {
+  for_each = toset(local.azs)
 
-#   vpc_id            = aws_vpc.main.id
-#   availability_zone = each.value
-#   cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, index(local.azs, each.value) + 10)
+  vpc_id            = aws_vpc.main.id
+  availability_zone = each.value
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, index(local.azs, each.value) + 10)
 
-#   tags = {
-#     Name = "${local.vpc_name}-${each.value}-private-subnet"
+  tags = {
+    Name = "${local.vpc_name}-${each.value}-private-subnet"
 
-#     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-#     "kubernetes.io/role/internal-elb"             = "1"
-#     "karpenter.sh/discovery"                      = local.cluster_name
-#   }
-# }
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = "1"
+    "karpenter.sh/discovery"                      = local.cluster_name
+  }
+}
 
-# resource "aws_route_table" "private" {
-#   vpc_id = aws_vpc.main.id
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
 
-#   route {
-#     cidr_block     = "0.0.0.0/0"
-#     nat_gateway_id = aws_nat_gateway.nat.id
-#   }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
 
-#   tags = {
-#     Name = "${local.vpc_name}-private"
-#   }
-# }
+  tags = {
+    Name = "${local.vpc_name}-private"
+  }
+}
 
-# resource "aws_route_table_association" "private" {
-#   for_each       = aws_subnet.private
-#   subnet_id      = each.value.id
-#   route_table_id = aws_route_table.private.id
-# }
+resource "aws_route_table_association" "private" {
+  for_each       = aws_subnet.private
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private.id
+}
 
-# # ##############################
-# # Private NAT
-# # ##############################
-# # eip
-# resource "aws_eip" "nat" {
-#   domain = "vpc"
+# ##############################
+# Private NAT
+# ##############################
+# eip
+resource "aws_eip" "nat" {
+  domain = "vpc"
 
-#   tags = {
-#     Name = "${local.vpc_name}-nat-eip"
-#   }
-# }
+  tags = {
+    Name = "${local.vpc_name}-nat-eip"
+  }
+}
 
-# resource "aws_nat_gateway" "nat" {
-#   allocation_id = aws_eip.nat.id
-#   subnet_id     = aws_subnet.public[local.azs[0]].id
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[local.azs[0]].id
 
-#   tags = {
-#     Name = "${local.vpc_name}-nat"
-#   }
+  tags = {
+    Name = "${local.vpc_name}-nat"
+  }
 
-#   depends_on = [aws_internet_gateway.igw]
-# }
+  depends_on = [aws_internet_gateway.igw]
+}
