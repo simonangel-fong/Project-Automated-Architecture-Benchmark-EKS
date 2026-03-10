@@ -93,11 +93,14 @@ jobs:
       test_report: ${{ matrix.solution.test_report }}
       test_script: test_hp_mixed.js
 
-# debug: remove upload report to s3
-# debug: notify slack
+  # debug: remove upload report to s3
+  # debug: notify slack
 
   destroy:
-    name: Destroy
+    name: Clean up
+    if: ${{ always() }}
+    needs:
+      - performance_testing_mixed
     uses: ./.github/workflows/job_destroy.yaml
     permissions:
       contents: read
