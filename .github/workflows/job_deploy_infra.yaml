@@ -63,13 +63,13 @@ jobs:
             TF_VAR_cluster_admin_arn: ${{ secrets.cluster_admin_arn }}
             TF_VAR_github_cicd_role_arn: ${{ secrets.aws_github_action_role_arn }}
             TF_VAR_test_version: ${{ inputs.test_version }}
-        # outputs:
-        #     vpc_id: ${{ steps.tf-outputs.outputs.vpc_id }}
-        #     cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
-        #     cluster_endpoint: ${{ steps.tf-outputs.outputs.cluster_endpoint }}
-        #     queue_name: ${{ steps.tf-outputs.outputs.queue_name }}
-        #     iam_role_lbc: ${{ steps.tf-outputs.outputs.lbc_arn }}
-        #     iam_role_eso: ${{ steps.tf-outputs.outputs.eso_arn }}
+        outputs:
+            vpc_id: ${{ steps.tf-outputs.outputs.vpc_id }}
+            cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
+            cluster_endpoint: ${{ steps.tf-outputs.outputs.cluster_endpoint }}
+            queue_name: ${{ steps.tf-outputs.outputs.queue_name }}
+            iam_role_lbc: ${{ steps.tf-outputs.outputs.lbc_arn }}
+            iam_role_eso: ${{ steps.tf-outputs.outputs.eso_arn }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -134,68 +134,68 @@ jobs:
               working-directory: ${{ env.TF_DIR }}
               run: terraform apply -auto-approve -no-color tfplan
 
-    #         - name: Export Terraform Outputs
-    #           id: tf-outputs
-    #           working-directory: ${{ env.TF_DIR }}
-    #           run: |
-    #               echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
-    #               echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
-    #               echo "CLUSTER_ENDPOINT=$(terraform output -raw cluster_endpoint)" >> $GITHUB_OUTPUT
-    #               echo "QUEUE_NAME=$(terraform output -raw queue_name)" >> $GITHUB_OUTPUT
+            - name: Export Terraform Outputs
+              id: tf-outputs
+              working-directory: ${{ env.TF_DIR }}
+              run: |
+                  echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
+                  echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+                  echo "CLUSTER_ENDPOINT=$(terraform output -raw cluster_endpoint)" >> $GITHUB_OUTPUT
+                  echo "QUEUE_NAME=$(terraform output -raw queue_name)" >> $GITHUB_OUTPUT
                   
-    #               echo "LBC_ARN=$(terraform output -raw iam_role_lbc)" >> $GITHUB_OUTPUT
-    #               echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
+                  echo "LBC_ARN=$(terraform output -raw iam_role_lbc)" >> $GITHUB_OUTPUT
+                  echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
 
-    # deploy_k8s:
-    #     name: K8s ${{ inputs.arch }}
-    #     needs:
-    #         - deploy_infra
-    #     runs-on: ubuntu-latest
-    #     timeout-minutes: 60
-    #     permissions:
-    #         contents: read
-    #         id-token: write # Required for OIDC authentication
-    #     env:
-    #         ARCH: ${{ inputs.arch }}
-    #         REGION: ${{ inputs.aws_region }}
+    deploy_k8s:
+        name: K8s ${{ inputs.arch }}
+        needs:
+            - deploy_infra
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        permissions:
+            contents: read
+            id-token: write # Required for OIDC authentication
+        env:
+            ARCH: ${{ inputs.arch }}
+            REGION: ${{ inputs.aws_region }}
 
-    #         VPC_ID: ${{ needs.deploy_infra.outputs.vpc_id }}
-    #         CLUSTER_NAME: ${{ needs.deploy_infra.outputs.cluster_name }}
-    #         CLUSTER_ENDPOINT: ${{ needs.deploy_infra.outputs.cluster_endpoint }}
-    #         QUEUE_NAME: ${{ needs.deploy_infra.outputs.queue_name }}
+            VPC_ID: ${{ needs.deploy_infra.outputs.vpc_id }}
+            CLUSTER_NAME: ${{ needs.deploy_infra.outputs.cluster_name }}
+            CLUSTER_ENDPOINT: ${{ needs.deploy_infra.outputs.cluster_endpoint }}
+            QUEUE_NAME: ${{ needs.deploy_infra.outputs.queue_name }}
 
-    #         IAM_LBC_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_lbc }}
-    #         IAM_ESO_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_eso }}
-    #         CF_TOKEN: ${{ secrets.cf_api_token }}
+            IAM_LBC_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_lbc }}
+            IAM_ESO_ROLE_ARN: ${{ needs.deploy_infra.outputs.iam_role_eso }}
+            CF_TOKEN: ${{ secrets.cf_api_token }}
 
-    #     steps:
-    #         - name: Checkout code
-    #           uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-    #         - name: Configure AWS credentials (OIDC)
-    #           uses: aws-actions/configure-aws-credentials@v4
-    #           with:
-    #               role-to-assume: ${{ secrets.aws_github_action_role_arn}}
-    #               aws-region: ${{ inputs.aws_region }}
+            - name: Configure AWS credentials (OIDC)
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.aws_github_action_role_arn}}
+                  aws-region: ${{ inputs.aws_region }}
 
-    #         - name: Set up kubectl
-    #           uses: azure/setup-kubectl@v3
-    #           with:
-    #               version: "v1.34.0"
+            - name: Set up kubectl
+              uses: azure/setup-kubectl@v3
+              with:
+                  version: "v1.34.0"
 
-    #         - name: Update kubeconfig
-    #           run: |
-    #               echo "${{ inputs.project }}-${{ inputs.arch }}"
-    #               aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
+            - name: Update kubeconfig
+              run: |
+                  echo "${{ inputs.project }}-${{ inputs.arch }}"
+                  aws eks update-kubeconfig --name "${{ inputs.project }}-${{ inputs.arch }}" --region ${{ inputs.aws_region }}
 
-    #         - name: Install Helm
-    #           uses: azure/setup-helm@v4.3.0
+            - name: Install Helm
+              uses: azure/setup-helm@v4.3.0
 
-    #         - name: Deploy Add-ons
-    #           run: |
-    #               bash manifest/script/01_init_add_on.sh
+            - name: Deploy Add-ons
+              run: |
+                  bash manifest/script/01_init_add_on.sh
 
-    #         - name: Deploy backend
-    #           run: |
-    #               bash manifest/script/02_init_deploy_backend.sh
+            - name: Deploy backend
+              run: |
+                  bash manifest/script/02_init_deploy_backend.sh
 
