@@ -8,6 +8,7 @@ One Pipeline. Four Designs. Real Metrics.
 ## Project Overview
 
 - [Baseline](./docs/baseline.md)
+- [Scale](./docs/scale.md)
 - [Kafka](./docs/kafka.md)
 - [Redis](./docs/redis.md)
 - [Init Kubernetes](./docs/init.md)
