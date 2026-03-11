@@ -41,6 +41,8 @@ on:
                 description: "AWS bucket for tf remote backend"
             cluster_admin_arn:
                 description: "AWS arn for EKS cluster admin"
+            slack_webhook_url:
+                description: "Slack webhook url"
 
 jobs:
     destroy_k8s:
@@ -74,6 +76,26 @@ jobs:
                   ARCH: ${{ inputs.arch }}
               run: |
                   bash manifest/script/99_destroy.sh
+
+            - name: Notify Slack
+              if: failure()
+              uses: slackapi/slack-github-action@v2.1.1
+              with:
+                  webhook: ${{ secrets.slack_webhook_url }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      text: |
+                          ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}: ${{ job.status }}*
+                          
+                          Repo: ${{ github.repository }}
+                          Branch: ${{ github.ref_name }}
+                          Actor: ${{ github.triggering_actor }}
+                          Event: ${{ github.event_name }}
+                          Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                          Status: ${{ job.status }}
+
+                          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
 
     destroy_infra:
         name: AWS ${{ inputs.arch }}
@@ -159,3 +181,22 @@ jobs:
             - name: Destroy - Terraform Apply
               working-directory: ${{ env.TF_DIR }}
               run: terraform apply -auto-approve -no-color tfplan-destroy
+
+            - name: Notify Slack
+              if: always()
+              uses: slackapi/slack-github-action@v2.1.1
+              with:
+                  webhook: ${{ secrets.slack_webhook_url }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      text: |
+                          ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}: ${{ job.status }}*
+                          
+                          Repo: ${{ github.repository }}
+                          Branch: ${{ github.ref_name }}
+                          Actor: ${{ github.triggering_actor }}
+                          Event: ${{ github.event_name }}
+                          Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                          Status: ${{ job.status }}
+
+                          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

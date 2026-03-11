@@ -156,15 +156,16 @@ jobs:
                   webhook-type: incoming-webhook
                   payload: |
                       text: |
-                        *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                        
-                        Repo: ${{ github.repository }}
-                        Branch: ${{ github.ref_name }}
-                        Actor: ${{ github.triggering_actor }}
-                        Event: ${{ github.event_name }}
-                        Workflow: ${{ github.workflow }}-${{ inputs.arch }}
-                        Status: ${{ job.status }}
-                        Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                          ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}: ${{ job.status }}*
+                          
+                          Repo: ${{ github.repository }}
+                          Branch: ${{ github.ref_name }}
+                          Actor: ${{ github.triggering_actor }}
+                          Event: ${{ github.event_name }}
+                          Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                          Status: ${{ job.status }}
+
+                          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     deploy_k8s:
         name: K8s ${{ inputs.arch }}
@@ -227,12 +228,13 @@ jobs:
                   webhook-type: incoming-webhook
                   payload: |
                       text: |
-                        *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                        
-                        Repo: ${{ github.repository }}
-                        Branch: ${{ github.ref_name }}
-                        Actor: ${{ github.triggering_actor }}
-                        Event: ${{ github.event_name }}
-                        Workflow: ${{ github.workflow }}-${{ inputs.arch }}
-                        Status: ${{ job.status }}
-                        Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                          ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}: ${{ job.status }}*
+                          
+                          Repo: ${{ github.repository }}
+                          Branch: ${{ github.ref_name }}
+                          Actor: ${{ github.triggering_actor }}
+                          Event: ${{ github.event_name }}
+                          Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                          Status: ${{ job.status }}
+
+                          Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
