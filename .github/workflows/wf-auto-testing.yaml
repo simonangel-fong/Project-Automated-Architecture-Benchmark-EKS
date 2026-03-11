@@ -46,40 +46,11 @@ jobs:
   #     cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}
   #     slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  # smoke_testing:
-  #   name: Smoke Testing
-  #   needs:
-  #     - deploy_infra
-  #   uses: ./.github/workflows/job_test_smoke.yaml
-  #   permissions:
-  #     contents: read
-  #     id-token: write # OIDC
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       solution:
-  #         - arch: baseline
-  #           base_url: "https://eks-benchmark-baseline.arguswatcher.net"
-  #         # - arch: scale
-  #         #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
-  #         # - arch: redis
-  #         #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
-  #         # - arch: kafka
-  #         #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
-  #   with:
-  #     base_url: ${{ matrix.solution.base_url }}
-  #     arch: ${{ matrix.solution.arch }}
-  #     aws_region: ${{vars.AWS_REGION}}
-  #   secrets:
-  #     slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-  #     s3_bucket: ${{ secrets.S3_BUCKET }}
-  #     aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
-
-  performance_testing_mixed:
-    name: Load Testing
+  smoke_testing:
+    name: Smoke Testing
     # needs:
-    #   - smoke_testing
-    uses: ./.github/workflows/job_test_performance.yaml
+    #   - deploy_infra
+    uses: ./.github/workflows/job_test_smoke.yaml
     permissions:
       contents: read
       id-token: write # OIDC
@@ -89,23 +60,52 @@ jobs:
         solution:
           - arch: baseline
             base_url: "https://eks-benchmark-baseline.arguswatcher.net"
-            test_report: baseline_cicd_mixed.html
           # - arch: scale
           #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
-          #   test_report: scale_cicd_mixed.html
           # - arch: redis
           #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
-          #   test_report: redis_cicd_mixed.html
           # - arch: kafka
           #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
-          #   test_report: kafka_cicd_mixed.html
     with:
       base_url: ${{ matrix.solution.base_url }}
       arch: ${{ matrix.solution.arch }}
-      test_report: ${{ matrix.solution.test_report }}
-      test_script: test_hp_mixed.js
-      aws_region: ${{ vars.AWS_REGION }}
+      aws_region: ${{vars.AWS_REGION}}
     secrets:
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      s3_bucket: ${{ secrets.S3_BUCKET }}
+      aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
+
+  # performance_testing_mixed:
+  #   name: Load Testing
+  #   # needs:
+  #   #   - smoke_testing
+  #   uses: ./.github/workflows/job_test_performance.yaml
+  #   permissions:
+  #     contents: read
+  #     id-token: write # OIDC
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       solution:
+  #         - arch: baseline
+  #           base_url: "https://eks-benchmark-baseline.arguswatcher.net"
+  #           test_report: baseline_cicd_mixed.html
+  #         # - arch: scale
+  #         #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
+  #         #   test_report: scale_cicd_mixed.html
+  #         # - arch: redis
+  #         #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
+  #         #   test_report: redis_cicd_mixed.html
+  #         # - arch: kafka
+  #         #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
+  #         #   test_report: kafka_cicd_mixed.html
+  #   with:
+  #     base_url: ${{ matrix.solution.base_url }}
+  #     arch: ${{ matrix.solution.arch }}
+  #     test_report: ${{ matrix.solution.test_report }}
+  #     test_script: test_hp_mixed.js
+  #     aws_region: ${{ vars.AWS_REGION }}
+  #   secrets:
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
       s3_bucket: ${{ secrets.S3_BUCKET }}
       aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}

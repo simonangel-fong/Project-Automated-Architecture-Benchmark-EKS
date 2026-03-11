@@ -106,7 +106,8 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Upload files to S3
-        run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ env.K6_REPORT_NAME }}" --delete
+        run: |
+          aws s3 cp ${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }} s3://${{secrets.s3_bucket}}/report/${{ env.K6_REPORT_NAME }}
 
       - name: Notify Slack
         if: always()
