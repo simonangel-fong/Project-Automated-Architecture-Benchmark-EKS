@@ -152,7 +152,7 @@ jobs:
               if: always()
               uses: slackapi/slack-github-action@v2.1.1
               with:
-                webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+                webhook: ${{ secrets.slack_webhook_url }}
                 webhook-type: incoming-webhook
                 payload: |
                     text: >
