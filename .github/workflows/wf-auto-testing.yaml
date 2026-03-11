@@ -46,26 +46,28 @@ jobs:
       cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  # smoke_testing:
-  #   name: Smoke Testing
-  #   needs:
-  #     - deploy_infra
-  #   uses: ./.github/workflows/job_test_smoke.yaml
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       solution:
-  #         - arch: baseline
-  #           base_url: "https://eks-benchmark-baseline.arguswatcher.net"
-  #         # - arch: scale
-  #         #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
-  #         # - arch: redis
-  #         #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
-  #         # - arch: kafka
-  #         #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
-  #   with:
-  #     base_url: ${{ matrix.solution.base_url }}
-  #     arch: ${{ matrix.solution.arch }}
+  smoke_testing:
+    name: Smoke Testing
+    needs:
+      - deploy_infra
+    uses: ./.github/workflows/job_test_smoke.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        solution:
+          - arch: baseline
+            base_url: "https://eks-benchmark-baseline.arguswatcher.net"
+          # - arch: scale
+          #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
+          # - arch: redis
+          #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
+          # - arch: kafka
+          #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
+    with:
+      base_url: ${{ matrix.solution.base_url }}
+      arch: ${{ matrix.solution.arch }}
+    secrets:
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # performance_testing_mixed:
   #   name: Load Testing

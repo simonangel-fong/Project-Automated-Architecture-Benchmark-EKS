@@ -12,6 +12,9 @@ on:
         description: "Architecture"
         required: true
         type: string
+    secrets:
+      slack_webhook_url:
+        description: "Slack webhook url"
 
 jobs:
   testing-smoke:
@@ -24,7 +27,7 @@ jobs:
       K6_SCRIPT: test/k6/script/test_smoke.js
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Wait for DNS
         run: |
@@ -58,7 +61,7 @@ jobs:
           echo "Endpoint is ready: $BASE_URL/api"
 
       - name: Setup K6
-        uses: grafana/setup-k6-action@v1
+        uses: grafana/setup-k6-action@v1.1.0
 
       - name: Create report dir
         run: |
@@ -66,7 +69,7 @@ jobs:
 
       - name: Smoke Testing
         id: testing-smoke
-        uses: grafana/run-k6-action@v1
+        uses: grafana/run-k6-action@v1.3.1
         env:
           K6_WEB_DASHBOARD: "true"
           K6_WEB_DASHBOARD_EXPORT: "${{ env.K6_REPORT }}"
@@ -79,7 +82,7 @@ jobs:
 
       - name: Cache smoke report artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "k6-report-${{ inputs.arch }}_cicd_smoke.html"
           path: |
@@ -93,15 +96,13 @@ jobs:
         if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: >
-            ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-            *${{ github.workflow }}* / *${{ github.job }}*
-            ended with *${{ job.status }}*.
-
-            *Repo:* ${{ github.repository }}
-            *Branch:* ${{ github.ref_name }}
-            *Actor:* ${{ github.actor }}
-            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            webhook: ${{ secrets.slack_webhook_url }}
+            webhook-type: incoming-webhook
+            payload: |
+                text: |
+                  ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}*
+                  
+                  Repo: ${{ github.repository }}
+                  Branch: ${{ github.ref_name }}
+                  Trigger: ${{ github.triggering_actor }}
+                  Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
