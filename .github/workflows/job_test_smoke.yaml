@@ -96,7 +96,7 @@ jobs:
         with:
           name: "k6-report-${{ inputs.arch }}_cicd_smoke.html"
           path: |
-            "${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}"
+            ${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}
           retention-days: 7
 
       - name: Configure AWS credentials
