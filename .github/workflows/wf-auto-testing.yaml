@@ -77,8 +77,8 @@ jobs:
 
   performance_testing_mixed:
     name: Load Testing
-    # needs:
-    #   - smoke_testing
+    needs:
+      - smoke_testing
     uses: ./.github/workflows/job_test_performance.yaml
     permissions:
       contents: read
