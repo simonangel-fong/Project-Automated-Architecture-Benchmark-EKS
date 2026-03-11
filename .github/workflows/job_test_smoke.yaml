@@ -116,7 +116,7 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             text: |
-              *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+              *${{ github.workflow }}-${{ inputs.arch }}: ${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
               
               Repo: ${{ github.repository }}
               Branch: ${{ github.ref_name }}
