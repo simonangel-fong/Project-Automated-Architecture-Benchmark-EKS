@@ -12,11 +12,17 @@ on:
         description: "Architecture"
         required: true
         type: string
+      aws_region:
+        description: "AWS region"
+        required: true
+        type: string
     secrets:
       slack_webhook_url:
         description: "Slack webhook url"
       s3_bucket:
         description: "S3 bucket name"
+      aws_github_action_role_arn:
+        description: "AWS role for GitHub Actions"
 
 jobs:
   testing-smoke:
@@ -91,6 +97,12 @@ jobs:
             ${{ env.K6_REPORT }}
           retention-days: 7
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.aws_github_action_role_arn}}
+          aws-region: ${{ inputs.aws_region }}
+
       - name: Upload files to S3
         run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ inputs.arch }}_cicd_smoke.html" --delete
 
@@ -102,9 +114,12 @@ jobs:
             webhook-type: incoming-webhook
             payload: |
                 text: |
-                  ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}*
+                  *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
                   
                   Repo: ${{ github.repository }}
                   Branch: ${{ github.ref_name }}
-                  Trigger: ${{ github.triggering_actor }}
+                  Actor: ${{ github.triggering_actor }}
+                  Event: ${{ github.event_name }}
+                  Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                  Status: ${{ job.status }}
                   Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

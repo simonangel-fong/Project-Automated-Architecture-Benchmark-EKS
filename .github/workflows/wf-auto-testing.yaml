@@ -66,9 +66,11 @@ jobs:
     with:
       base_url: ${{ matrix.solution.base_url }}
       arch: ${{ matrix.solution.arch }}
+      aws_region: ${{vars.AWS_REGION}}
     secrets:
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
       s3_bucket: ${{ secrets.S3_BUCKET }}
+      aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
 
   # performance_testing_mixed:
   #   name: Load Testing

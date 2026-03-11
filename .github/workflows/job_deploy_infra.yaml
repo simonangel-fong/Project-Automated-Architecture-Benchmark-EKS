@@ -160,7 +160,10 @@ jobs:
                         
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
-                        Trigger: ${{ github.triggering_actor }}
+                        Actor: ${{ github.triggering_actor }}
+                        Event: ${{ github.event_name }}
+                        Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                        Status: ${{ job.status }}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     deploy_k8s:
@@ -228,5 +231,8 @@ jobs:
                         
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
-                        Trigger: ${{ github.event_name }}  ${{ github.event}}
+                        Actor: ${{ github.triggering_actor }}
+                        Event: ${{ github.event_name }}
+                        Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+                        Status: ${{ job.status }}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
