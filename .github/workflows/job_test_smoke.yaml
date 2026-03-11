@@ -28,9 +28,6 @@ jobs:
   testing-smoke:
     name: Smoke Testing ${{ inputs.arch }} 
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Required for OIDC
-      contents: read
     env:
       ENV: ${{ inputs.arch }}
       BASE_URL: ${{ inputs.base_url }}
@@ -126,5 +123,5 @@ jobs:
                   Event: ${{ github.event_name }}
                   Workflow: ${{ github.workflow }}-${{ inputs.arch }}
                   Status: ${{ job.status }}
-                  
+
                   Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
