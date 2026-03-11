@@ -113,17 +113,19 @@ jobs:
         if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
-          webhook: ${{ secrets.slack_webhook_url }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: |
-                ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}: ${{ job.status }}*
-              
-                Repo: ${{ github.repository }}
-                Branch: ${{ github.ref_name }}
-                Actor: ${{ github.triggering_actor }}
-                Event: ${{ github.event_name }}
-                Workflow: ${{ github.workflow }}-${{ inputs.arch }}
-                Status: ${{ job.status }}
+            webhook: ${{ secrets.slack_webhook_url }}
+            webhook-type: incoming-webhook
+            payload: |
+                text: |
+                    ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.job }}-${{ inputs.arch }}: ${{ job.status }}*
+                    
+                    Repo: ${{ github.repository }}
+                    Branch: ${{ github.ref_name }}
+                    Workflow: ${{ github.workflow }}
+                    Job: ${{ github.job }}
+                    Actor: ${{ github.triggering_actor }}
+                    Event: ${{ github.event_name }}
+                    Status: ${{ job.status }}
 
-                Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                    Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+

@@ -41,3 +41,4 @@ jobs:
       aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
       aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
       cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
