@@ -24,11 +24,20 @@ jobs:
       - name: Upload files to S3
         run: aws s3 sync test/k6/report s3://${{env.S3_BUCKET}}/report --include "demo.html" --delete 
 
-      - name: Greet the reader
+      - name: Notify Slack
+        if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
             channel: ${{ secrets.SLACK_CHANNEL_ID }}
-            text: "This message was sent through a proxy"
+            text: >
+              ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+              *${{ github.workflow }}* / *${{ github.job }}*
+              ended with *${{ job.status }}*.
+
+              *Repo:* ${{ github.repository }}
+              *Branch:* ${{ github.ref_name }}
+              *Actor:* ${{ github.actor }}
+              *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
