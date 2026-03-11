@@ -26,13 +26,15 @@ on:
 
 jobs:
   testing-smoke:
-    name: Smoke Testing ${{ inputs.arch }} 
+    name: Smoke Testing ${{ inputs.arch }}
     runs-on: ubuntu-latest
     env:
       ENV: ${{ inputs.arch }}
       BASE_URL: ${{ inputs.base_url }}
-      K6_REPORT: ${{ inputs.arch }}_cicd_smoke.html
-      K6_SCRIPT: test/k6/test_smoke.js
+      K6_REPORT_PATH: test/k6/report
+      K6_REPORT_NAME: ${{ inputs.arch }}_cicd_smoke.html
+      K6_SCRIPT_PATH: test/k6/script
+      K6_SCRIPT_NAME: test_smoke.js
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -73,20 +75,20 @@ jobs:
 
       - name: Create report dir
         run: |
-          mkdir -pv test/k6/report
+          mkdir -pv ${{ env.K6_REPORT_PATH }}
 
       - name: Smoke Testing
         id: testing-smoke
         uses: grafana/run-k6-action@v1.3.1
         env:
           K6_WEB_DASHBOARD: "true"
-          K6_WEB_DASHBOARD_EXPORT: "test/k6/report/${{ env.K6_REPORT }}"
+          K6_WEB_DASHBOARD_EXPORT: "${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}"
         with:
           debug: true
           fail-fast: true
           flags: --env BASE_URL=${{env.BASE_URL}}
           path: |
-            "${{ env.K6_SCRIPT }}"
+            "${{ env.K6_SCRIPT_PATH }}/${{ env.K6_SCRIPT_NAME }}"
 
       - name: Cache smoke report artifact
         if: always()
@@ -94,7 +96,7 @@ jobs:
         with:
           name: "k6-report-${{ inputs.arch }}_cicd_smoke.html"
           path: |
-            test/k6/report//${{ env.K6_REPORT }}
+            "${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}"
           retention-days: 7
 
       - name: Configure AWS credentials
@@ -104,23 +106,23 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Upload files to S3
-        run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ env.K6_REPORT }}" --delete
+        run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ env.K6_REPORT_NAME }}" --delete
 
       - name: Notify Slack
         if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
-            webhook: ${{ secrets.slack_webhook_url }}
-            webhook-type: incoming-webhook
-            payload: |
-                text: |
-                  *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                  
-                  Repo: ${{ github.repository }}
-                  Branch: ${{ github.ref_name }}
-                  Actor: ${{ github.triggering_actor }}
-                  Event: ${{ github.event_name }}
-                  Workflow: ${{ github.workflow }}-${{ inputs.arch }}
-                  Status: ${{ job.status }}
+          webhook: ${{ secrets.slack_webhook_url }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: |
+              *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+              
+              Repo: ${{ github.repository }}
+              Branch: ${{ github.ref_name }}
+              Actor: ${{ github.triggering_actor }}
+              Event: ${{ github.event_name }}
+              Workflow: ${{ github.workflow }}-${{ inputs.arch }}
+              Status: ${{ job.status }}
 
-                  Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
