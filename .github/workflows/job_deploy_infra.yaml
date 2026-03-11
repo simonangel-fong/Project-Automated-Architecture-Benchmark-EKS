@@ -160,7 +160,7 @@ jobs:
                         
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
-                        Actor: ${{ github.actor }}
+                        Trigger: ${{ github.triggering_actor }}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     deploy_k8s:
@@ -228,5 +228,5 @@ jobs:
                         
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
-                        Actor: ${{ github.actor }}
+                        Trigger: ${{ github.triggering_actor }}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
