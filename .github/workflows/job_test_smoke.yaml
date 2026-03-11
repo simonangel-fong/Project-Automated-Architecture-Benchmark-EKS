@@ -26,13 +26,17 @@ on:
 
 jobs:
   testing-smoke:
-    name: ${{ inputs.arch }} Smoke Testing
+    name: Smoke Testing ${{ inputs.arch }} 
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC
+      contents: read
     env:
       ENV: ${{ inputs.arch }}
       BASE_URL: ${{ inputs.base_url }}
-      K6_REPORT: test/k6/report/${{ inputs.arch }}_cicd_smoke.html
-      K6_SCRIPT: test/k6/script/test_smoke.js
+      K6_PATH: test/k6/report
+      K6_REPORT: ${{ inputs.arch }}_cicd_smoke.html
+      K6_SCRIPT: test_smoke.js
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -73,20 +77,20 @@ jobs:
 
       - name: Create report dir
         run: |
-          mkdir -pv test/k6/report/
+          mkdir -pv ${{ env.K6_PATH }}
 
       - name: Smoke Testing
         id: testing-smoke
         uses: grafana/run-k6-action@v1.3.1
         env:
           K6_WEB_DASHBOARD: "true"
-          K6_WEB_DASHBOARD_EXPORT: "${{ env.K6_REPORT }}"
+          K6_WEB_DASHBOARD_EXPORT: "${{ env.K6_PATH }}/${{ env.K6_REPORT }}"
         with:
           debug: true
           fail-fast: true
           flags: --env BASE_URL=${{env.BASE_URL}}
           path: |
-            ${{ env.K6_SCRIPT }}
+            ${{ env.K6_PATH }}/${{ env.K6_SCRIPT }}
 
       - name: Cache smoke report artifact
         if: always()
@@ -94,7 +98,7 @@ jobs:
         with:
           name: "k6-report-${{ inputs.arch }}_cicd_smoke.html"
           path: |
-            ${{ env.K6_REPORT }}
+            ${{ env.K6_PATH }}/${{ env.K6_REPORT }}
           retention-days: 7
 
       - name: Configure AWS credentials
@@ -104,7 +108,7 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Upload files to S3
-        run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ inputs.arch }}_cicd_smoke.html" --delete
+        run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ env.K6_REPORT }}" --delete
 
       - name: Notify Slack
         if: always()
@@ -122,4 +126,5 @@ jobs:
                   Event: ${{ github.event_name }}
                   Workflow: ${{ github.workflow }}-${{ inputs.arch }}
                   Status: ${{ job.status }}
+                  
                   Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
