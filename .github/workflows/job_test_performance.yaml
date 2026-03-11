@@ -77,12 +77,14 @@ jobs:
           retention-days: 7
 
       - name: Configure AWS credentials
+        if: always()
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.aws_github_action_role_arn}}
           aws-region: ${{ inputs.aws_region }}
 
       - name: Upload files to S3
+        if: always()
         run: aws s3 sync test/k6/report s3://${{secrets.s3_bucket}}/report --include "${{ env.K6_REPORT_NAME }}" --delete
 
       - name: Notify Slack
