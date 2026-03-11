@@ -87,7 +87,7 @@ jobs:
           fail-fast: true
           flags: --env BASE_URL=${{env.BASE_URL}}
           path: |
-            ${{ env.K6_PATH }}/${{ env.K6_SCRIPT }}
+            "${{ env.K6_PATH }}/${{ env.K6_SCRIPT }}"
 
       - name: Cache smoke report artifact
         if: always()
