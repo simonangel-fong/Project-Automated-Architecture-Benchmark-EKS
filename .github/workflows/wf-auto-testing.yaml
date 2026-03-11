@@ -106,9 +106,9 @@ jobs:
   #     test_script: test_hp_mixed.js
   #     aws_region: ${{ vars.AWS_REGION }}
   #   secrets:
-      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-      s3_bucket: ${{ secrets.S3_BUCKET }}
-      aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
+      # slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # s3_bucket: ${{ secrets.S3_BUCKET }}
+      # aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
 
 
   # # debug: remove upload report to s3
