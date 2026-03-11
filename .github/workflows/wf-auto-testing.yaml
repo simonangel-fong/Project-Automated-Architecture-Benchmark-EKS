@@ -44,88 +44,89 @@ jobs:
       aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
       aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
       cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  smoke_testing:
-    name: Smoke Testing
-    needs:
-      - deploy_infra
-    uses: ./.github/workflows/job_test_smoke.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        solution:
-          - arch: baseline
-            base_url: "https://eks-benchmark-baseline.arguswatcher.net"
-          # - arch: scale
-          #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
-          # - arch: redis
-          #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
-          # - arch: kafka
-          #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
-    with:
-      base_url: ${{ matrix.solution.base_url }}
-      arch: ${{ matrix.solution.arch }}
+  # smoke_testing:
+  #   name: Smoke Testing
+  #   needs:
+  #     - deploy_infra
+  #   uses: ./.github/workflows/job_test_smoke.yaml
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       solution:
+  #         - arch: baseline
+  #           base_url: "https://eks-benchmark-baseline.arguswatcher.net"
+  #         # - arch: scale
+  #         #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
+  #         # - arch: redis
+  #         #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
+  #         # - arch: kafka
+  #         #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
+  #   with:
+  #     base_url: ${{ matrix.solution.base_url }}
+  #     arch: ${{ matrix.solution.arch }}
 
-  performance_testing_mixed:
-    name: Load Testing
-    needs:
-      - smoke_testing
-    uses: ./.github/workflows/job_test_performance.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        solution:
-          - arch: baseline
-            base_url: "https://eks-benchmark-baseline.arguswatcher.net"
-            test_report: baseline_cicd_mixed.html
-          # - arch: scale
-          #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
-          #   test_report: scale_cicd_mixed.html
-          # - arch: redis
-          #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
-          #   test_report: redis_cicd_mixed.html
-          # - arch: kafka
-          #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
-          #   test_report: kafka_cicd_mixed.html
-    with:
-      base_url: ${{ matrix.solution.base_url }}
-      arch: ${{ matrix.solution.arch }}
-      test_report: ${{ matrix.solution.test_report }}
-      test_script: test_hp_mixed.js
+  # performance_testing_mixed:
+  #   name: Load Testing
+  #   needs:
+  #     - smoke_testing
+  #   uses: ./.github/workflows/job_test_performance.yaml
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       solution:
+  #         - arch: baseline
+  #           base_url: "https://eks-benchmark-baseline.arguswatcher.net"
+  #           test_report: baseline_cicd_mixed.html
+  #         # - arch: scale
+  #         #   base_url: "https://eks-benchmark-scale.arguswatcher.net"
+  #         #   test_report: scale_cicd_mixed.html
+  #         # - arch: redis
+  #         #   base_url: "https://eks-benchmark-redis.arguswatcher.net"
+  #         #   test_report: redis_cicd_mixed.html
+  #         # - arch: kafka
+  #         #   base_url: "https://eks-benchmark-kafka.arguswatcher.net"
+  #         #   test_report: kafka_cicd_mixed.html
+  #   with:
+  #     base_url: ${{ matrix.solution.base_url }}
+  #     arch: ${{ matrix.solution.arch }}
+  #     test_report: ${{ matrix.solution.test_report }}
+  #     test_script: test_hp_mixed.js
 
-  # debug: remove upload report to s3
-  # debug: notify slack
+  # # debug: remove upload report to s3
+  # # debug: notify slack
 
-  destroy:
-    name: Clean up
-    if: ${{ always() }}
-    needs:
-      - performance_testing_mixed
-    uses: ./.github/workflows/job_destroy.yaml
-    permissions:
-      contents: read
-      id-token: write # OIDC
-    strategy:
-      fail-fast: false
-      matrix:
-        solution:
-          - arch: baseline
-          - arch: scale
-          - arch: redis
-          - arch: kafka
-    with:
-      project: ${{ vars.PROJECT}}
-      arch: ${{ matrix.solution.arch }}
-      aws_region: ${{ vars.AWS_REGION }}
-      test_version: ${{ vars.TEST_VERSION }}
-    secrets:
-      db_name: ${{ secrets.DB_NAME }}
-      db_username: ${{ secrets.DB_USERNAME }}
-      db_password: ${{ secrets.DB_PASSWORD }}
-      db_app_pwd: ${{ secrets.DB_APP_PWD }}
-      db_readonly_pwd: ${{ secrets.DB_READONLY_PWD }}
-      cf_api_token: ${{ secrets.CF_API_TOKEN }}
-      cf_zone_id: ${{ secrets.CF_ZONE_ID }}
-      aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
-      aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
-      cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}
+  # destroy:
+  #   name: Clean up
+  #   if: ${{ always() }}
+  #   needs:
+  #     - performance_testing_mixed
+  #   uses: ./.github/workflows/job_destroy.yaml
+  #   permissions:
+  #     contents: read
+  #     id-token: write # OIDC
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       solution:
+  #         - arch: baseline
+  #         - arch: scale
+  #         - arch: redis
+  #         - arch: kafka
+  #   with:
+  #     project: ${{ vars.PROJECT}}
+  #     arch: ${{ matrix.solution.arch }}
+  #     aws_region: ${{ vars.AWS_REGION }}
+  #     test_version: ${{ vars.TEST_VERSION }}
+  #   secrets:
+  #     db_name: ${{ secrets.DB_NAME }}
+  #     db_username: ${{ secrets.DB_USERNAME }}
+  #     db_password: ${{ secrets.DB_PASSWORD }}
+  #     db_app_pwd: ${{ secrets.DB_APP_PWD }}
+  #     db_readonly_pwd: ${{ secrets.DB_READONLY_PWD }}
+  #     cf_api_token: ${{ secrets.CF_API_TOKEN }}
+  #     cf_zone_id: ${{ secrets.CF_ZONE_ID }}
+  #     aws_github_action_role_arn: ${{ secrets.AWS_GITHUB_ACTION_ROLE_ARN }}
+  #     aws_backend_bucket: ${{ vars.AWS_BACKEND_BUCKET }}
+  #     cluster_admin_arn: ${{ secrets.CLUSTER_ADMIN_ARN }}

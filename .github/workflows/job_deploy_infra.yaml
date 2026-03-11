@@ -41,6 +41,8 @@ on:
                 description: "AWS bucket for tf remote backend"
             cluster_admin_arn:
                 description: "AWS arn for EKS cluster admin"
+            slack_webhook_url:
+                description: "Slack webhook url"
 
 jobs:
     deploy_infra:
