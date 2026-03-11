@@ -155,12 +155,12 @@ jobs:
                   webhook: ${{ secrets.slack_webhook_url }}
                   webhook-type: incoming-webhook
                   payload: |
-                      text: >
+                      text: |
                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}*\n
-                        Repo: ${{ github.repository }}\n
-                        Branch: ${{ github.ref_name }}\n
-                        Actor: ${{ github.actor }}\n
+                        *${{ github.workflow }}* *${{ inputs.arch }}*:*${{ job.status }}*
+                        Repo: ${{ github.repository }}
+                        Branch: ${{ github.ref_name }}
+                        Actor: ${{ github.actor }}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     deploy_k8s:
@@ -223,10 +223,10 @@ jobs:
                   webhook: ${{ secrets.slack_webhook_url }}
                   webhook-type: incoming-webhook
                   payload: |
-                      text: >
+                      text: |
                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}*\n
-                        Repo: ${{ github.repository }}\n
-                        Branch: ${{ github.ref_name }}\n
-                        Actor: ${{ github.actor }}\n
+                        *${{ github.workflow }}* *${{ inputs.arch }}*:*${{ job.status }}*
+                        Repo: ${{ github.repository }}
+                        Branch: ${{ github.ref_name }}
+                        Actor: ${{ github.actor }}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
