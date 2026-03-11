@@ -156,9 +156,8 @@ jobs:
                   webhook-type: incoming-webhook
                   payload: |
                       text: >
-                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                         *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}
-
+                        ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
                         Actor: ${{ github.actor }}
@@ -225,9 +224,8 @@ jobs:
                   webhook-type: incoming-webhook
                   payload: |
                       text: >
-                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                         *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}
-
+                        ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
                         Actor: ${{ github.actor }}
