@@ -157,10 +157,10 @@ jobs:
                   payload: |
                       text: >
                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}
-                        Repo: ${{ github.repository }}
-                        Branch: ${{ github.ref_name }}
-                        Actor: ${{ github.actor }}
+                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}*\n
+                        Repo: ${{ github.repository }}\n
+                        Branch: ${{ github.ref_name }}\n
+                        Actor: ${{ github.actor }}\n
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     deploy_k8s:
@@ -225,8 +225,8 @@ jobs:
                   payload: |
                       text: >
                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}
-                        Repo: ${{ github.repository }}
-                        Branch: ${{ github.ref_name }}
-                        Actor: ${{ github.actor }}
+                        *${{ github.workflow }}*-*${{ inputs.arch }}*:*${{ job.status }}*\n
+                        Repo: ${{ github.repository }}\n
+                        Branch: ${{ github.ref_name }}\n
+                        Actor: ${{ github.actor }}\n
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
