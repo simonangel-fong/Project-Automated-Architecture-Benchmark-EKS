@@ -60,6 +60,10 @@ jobs:
       - name: Setup K6
         uses: grafana/setup-k6-action@v1
 
+      - name: Create report dir
+        run: |
+          mkdir -pv test/k6/report/
+
       - name: Smoke Testing
         id: testing-smoke
         uses: grafana/run-k6-action@v1
