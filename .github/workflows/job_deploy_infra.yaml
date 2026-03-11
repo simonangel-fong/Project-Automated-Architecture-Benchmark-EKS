@@ -144,7 +144,7 @@ jobs:
                   echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
                   echo "CLUSTER_ENDPOINT=$(terraform output -raw cluster_endpoint)" >> $GITHUB_OUTPUT
                   echo "QUEUE_NAME=$(terraform output -raw queue_name)" >> $GITHUB_OUTPUT
-                  
+
                   echo "LBC_ARN=$(terraform output -raw iam_role_lbc)" >> $GITHUB_OUTPUT
                   echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
 
@@ -152,18 +152,18 @@ jobs:
               if: always()
               uses: slackapi/slack-github-action@v2.1.1
               with:
-                webhook: ${{ secrets.slack_webhook_url }}
-                webhook-type: incoming-webhook
-                payload: |
-                    text: >
-                    ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                    *${{ github.workflow }}* / *${{ github.job }}*
-                    ended with *${{ job.status }}*.
+                  webhook: ${{ secrets.slack_webhook_url }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      text: >
+                         ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+                         *${{ github.workflow }}* / *${{ github.job }}*
+                         ended with *${{ job.status }}*.
 
-                    *Repo:* ${{ github.repository }}
-                    *Branch:* ${{ github.ref_name }}
-                    *Actor:* ${{ github.actor }}
-                    *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                         *Repo:* ${{ github.repository }}
+                         *Branch:* ${{ github.ref_name }}
+                         *Actor:* ${{ github.actor }}
+                         *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     deploy_k8s:
         name: K8s ${{ inputs.arch }}
@@ -222,15 +222,15 @@ jobs:
               if: always()
               uses: slackapi/slack-github-action@v2.1.1
               with:
-                webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-                webhook-type: incoming-webhook
-                payload: |
-                    text: >
-                    ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
-                    *${{ github.workflow }}* / *${{ github.job }}*
-                    ended with *${{ job.status }}*.
+                  webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      text: >
+                      ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
+                      *${{ github.workflow }}* / *${{ github.job }}*
+                      ended with *${{ job.status }}*.
 
-                    *Repo:* ${{ github.repository }}
-                    *Branch:* ${{ github.ref_name }}
-                    *Actor:* ${{ github.actor }}
-                    *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                      *Repo:* ${{ github.repository }}
+                      *Branch:* ${{ github.ref_name }}
+                      *Actor:* ${{ github.actor }}
+                      *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
