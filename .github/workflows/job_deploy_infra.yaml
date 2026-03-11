@@ -149,14 +149,14 @@ jobs:
                   echo "ESO_ARN=$(terraform output -raw iam_role_eso)" >> $GITHUB_OUTPUT
 
             - name: Notify Slack
-              if: always()
+              if: failure()
               uses: slackapi/slack-github-action@v2.1.1
               with:
                   webhook: ${{ secrets.slack_webhook_url }}
                   webhook-type: incoming-webhook
                   payload: |
                       text: |
-                        ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}*
+                        *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
                         
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
@@ -224,9 +224,9 @@ jobs:
                   webhook-type: incoming-webhook
                   payload: |
                       text: |
-                        ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}*
+                        *${{ github.workflow }}-${{ inputs.arch }}:${{ job.status }}* ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }}
                         
                         Repo: ${{ github.repository }}
                         Branch: ${{ github.ref_name }}
-                        Trigger: ${{ github.triggering_actor }}
+                        Trigger: ${{ github.event_name }}  ${{ github.event}}
                         Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

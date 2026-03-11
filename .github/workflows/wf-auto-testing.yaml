@@ -68,6 +68,7 @@ jobs:
       arch: ${{ matrix.solution.arch }}
     secrets:
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      s3_bucket: ${{ secrets.S3_BUCKET }}
 
   # performance_testing_mixed:
   #   name: Load Testing
