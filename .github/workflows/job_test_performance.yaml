@@ -1,0 +1,109 @@
+# .github/workflows/job_test_performance.yaml
+name: Job-Performance Testing Read
+
+on:
+  workflow_call:
+    inputs:
+      base_url:
+        description: "The base url"
+        required: true
+        type: string
+      arch:
+        description: "Architecture"
+        required: true
+        type: string
+      test_report:
+        description: "Report name"
+        required: true
+        type: string
+      test_script:
+        description: "Testing script"
+        required: true
+        type: string
+      aws_region:
+        description: "AWS region"
+        required: true
+        type: string
+    secrets:
+      slack_webhook_url:
+        description: "Slack webhook url"
+      s3_bucket:
+        description: "S3 bucket name"
+      aws_github_action_role_arn:
+        description: "AWS role for GitHub Actions"
+
+jobs:
+  testing-performance:
+    name: ${{ inputs.arch }} Load Testing
+    runs-on: ubuntu-latest
+    env:
+      ENV: ${{ inputs.arch }}
+      BASE_URL: ${{ inputs.base_url }}
+      K6_REPORT_PATH: test/k6/report
+      K6_REPORT_NAME: ${{ inputs.test_report }}
+      K6_SCRIPT_PATH: test/k6/script
+      K6_SCRIPT_NAME: ${{ inputs.test_script }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1.1.0
+
+      - name: Create report dir
+        run: |
+          mkdir -pv ${{ env.K6_REPORT_PATH }}
+
+      - name: Performance Testing ${{ inputs.arch }}
+        id: testing-performance
+        uses: grafana/run-k6-action@v1.3.1
+        env:
+          K6_WEB_DASHBOARD: "true"
+          K6_WEB_DASHBOARD_EXPORT: "${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}"
+        with:
+          debug: true
+          fail-fast: true
+          flags: --env BASE_URL=${{env.BASE_URL}}
+          path: |
+            ${{ env.K6_SCRIPT_PATH }}/${{ env.K6_SCRIPT_NAME }}
+
+      - name: Upload performance report artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: "k6-report-${{ inputs.test_report }}"
+          path: |
+            "${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}"
+          retention-days: 7
+
+      - name: Configure AWS credentials
+        if: always()
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.aws_github_action_role_arn}}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Upload files to S3
+        if: always()
+        run: |
+          aws s3 cp ${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }} s3://${{secrets.s3_bucket}}/report/${{ env.K6_REPORT_NAME }}
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.slack_webhook_url }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: |
+                ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.job }}-${{ inputs.arch }}: ${{ job.status }}*
+                
+                Repo: ${{ github.repository }}
+                Branch: ${{ github.ref_name }}
+                Workflow: ${{ github.workflow }}
+                Job: ${{ github.job }}
+                Actor: ${{ github.triggering_actor }}
+                Event: ${{ github.event_name }}
+                Status: ${{ job.status }}
+
+                Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

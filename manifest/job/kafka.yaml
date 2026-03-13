@@ -1,0 +1,47 @@
+# kafka init job
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: msk-topic-admin
+  namespace: backend
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::099139718958:role/eks-benchmark-kafka-msk-topic-admin
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-kafka-topic
+  namespace: backend
+spec:
+  ttlSecondsAfterFinished: 600   # auto-cleanup after 1 hour
+  backoffLimit: 2
+  template:
+    spec:
+      serviceAccountName: msk-topic-admin # sa for msk
+      restartPolicy: Never
+      containers:
+        - name: init-kafka-topic
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:msk-topic-admin
+          resources:
+            requests:
+              cpu: "512m"
+              memory: "512Mi"
+            limits:
+              cpu: "512m"
+              memory: "512Mi"
+
+          env:
+            - name: BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__BOOTSTRAP_SERVERS
+            - name: TOPIC_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__TOPIC
+            - name: PARTITIONS
+              value: "3"
+            - name: REPLICATION_FACTOR
+              value: "3"

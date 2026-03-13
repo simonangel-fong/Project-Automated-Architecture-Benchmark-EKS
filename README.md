@@ -1,0 +1,19 @@
+# Automated Architecture Benchmark (EKS)
+
+One Pipeline. Four Designs. Real Metrics.
+
+- [Automated Architecture Benchmark (EKS)](#automated-architecture-benchmark-eks)
+  - [Project Overview](#project-overview)
+
+## Project Overview
+
+- [Baseline](./docs/baseline.md)
+- [Scale](./docs/scale.md)
+- [Kafka](./docs/kafka.md)
+- [Redis](./docs/redis.md)
+- [Init Kubernetes](./docs/init.md)
+  - [External Secret Operator](./docs/eso.md)
+  - [AWS Load Balancer Controller](./docs/lbc.md)
+  - [External DNS](./docs/dns.md)
+  - [Web](./docs/web.md)
+ 

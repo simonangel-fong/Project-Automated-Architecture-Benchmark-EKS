@@ -1,0 +1,20 @@
+# providers.tf
+
+# ##############################
+# Provider: AWS
+# ##############################
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = merge(
+      var.tags,
+      {
+        Project      = var.project_name
+        Architecture = var.arch
+        ManagedBy    = "terraform"
+        Test-Version = var.test_version
+      }
+    )
+  }
+}

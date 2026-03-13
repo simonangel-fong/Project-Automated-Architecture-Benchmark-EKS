@@ -1,0 +1,132 @@
+# .github/workflows/job_test_smoke.yaml
+name: Job-Smoke Testing
+
+on:
+  workflow_call:
+    inputs:
+      base_url:
+        description: "The base url"
+        required: true
+        type: string
+      arch:
+        description: "Architecture"
+        required: true
+        type: string
+      aws_region:
+        description: "AWS region"
+        required: true
+        type: string
+    secrets:
+      slack_webhook_url:
+        description: "Slack webhook url"
+      s3_bucket:
+        description: "S3 bucket name"
+      aws_github_action_role_arn:
+        description: "AWS role for GitHub Actions"
+
+jobs:
+  testing-smoke:
+    name: Smoke Testing ${{ inputs.arch }}
+    runs-on: ubuntu-latest
+    env:
+      ENV: ${{ inputs.arch }}
+      BASE_URL: ${{ inputs.base_url }}
+      K6_REPORT_PATH: test/k6/report
+      K6_REPORT_NAME: ${{ inputs.arch }}_cicd_smoke.html
+      K6_SCRIPT_PATH: test/k6/script
+      K6_SCRIPT_NAME: test_smoke.js
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Wait for DNS
+        run: |
+          set -euo pipefail
+
+          echo "Checking URL: $BASE_URL/api"
+
+          ATTEMPTS=900
+          SLEEP_SECONDS=1
+          URL_READY=0
+
+          for i in $(seq 1 "$ATTEMPTS"); do
+            echo "[$i/$ATTEMPTS] Trying $BASE_URL/api ..."
+
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api" || true)
+            echo "HTTP status: $HTTP_CODE"
+
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "307" ]; then
+              URL_READY=1
+              break
+            fi
+
+            sleep "$SLEEP_SECONDS"
+          done
+
+          if [ "$URL_READY" -eq 0 ]; then
+            echo "Endpoint did not become ready: $BASE_URL/api"
+            exit 1
+          fi
+
+          echo "Endpoint is ready: $BASE_URL/api"
+
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1.1.0
+
+      - name: Create report dir
+        run: |
+          mkdir -pv ${{ env.K6_REPORT_PATH }}
+
+      - name: Smoke Testing
+        id: testing-smoke
+        uses: grafana/run-k6-action@v1.3.1
+        env:
+          K6_WEB_DASHBOARD: "true"
+          K6_WEB_DASHBOARD_EXPORT: "${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}"
+        with:
+          debug: true
+          fail-fast: true
+          flags: --env BASE_URL=${{env.BASE_URL}}
+          path: |
+            ${{ env.K6_SCRIPT_PATH }}/${{ env.K6_SCRIPT_NAME }}
+
+      - name: Cache smoke report artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: "k6-report-${{ inputs.arch }}_cicd_smoke.html"
+          path: |
+            ${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }}
+          retention-days: 7
+
+      - name: Configure AWS credentials
+        if: always()
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.aws_github_action_role_arn}}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Upload files to S3
+        if: always()
+        run: |
+          aws s3 cp ${{ env.K6_REPORT_PATH }}/${{ env.K6_REPORT_NAME }} s3://${{secrets.s3_bucket}}/report/${{ env.K6_REPORT_NAME }}
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.slack_webhook_url }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: |
+                ${{ job.status == 'success' && '✅' || job.status == 'failure' && '❌' || '⚠️' }} *${{ github.job }}-${{ inputs.arch }}: ${{ job.status }}*
+                
+                Repo: ${{ github.repository }}
+                Branch: ${{ github.ref_name }}
+                Workflow: ${{ github.workflow }}
+                Job: ${{ github.job }}
+                Actor: ${{ github.triggering_actor }}
+                Event: ${{ github.event_name }}
+                Status: ${{ job.status }}
+
+                Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

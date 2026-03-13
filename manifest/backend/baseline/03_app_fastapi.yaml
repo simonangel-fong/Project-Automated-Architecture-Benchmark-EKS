@@ -1,0 +1,253 @@
+# app_fastapi.yaml
+# namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: app-cred
+  namespace: backend
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-global
+    kind: ClusterSecretStore
+  target:
+    name: app-cred
+    creationPolicy: Owner
+  data:
+    - secretKey: POSTGRES__HOST
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_host
+    - secretKey: POSTGRES__PORT
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_port
+    - secretKey: POSTGRES__DB
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_dbname
+    - secretKey: POSTGRES__USER
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_username
+    - secretKey: POSTGRES__PASSWORD
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_password
+    - secretKey: FLYWAY_URL
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: flyway_url
+    - secretKey: APP_USER_PASSWORD
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_app_pwd
+    - secretKey: APP_READONLY_PASSWORD
+      remoteRef:
+        key: eks-benchmark-baseline
+        property: db_readonly_pwd
+---
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: fastapi
+    app.kubernetes.io/part-of: eks-benchmark
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fastapi
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fastapi
+        app.kubernetes.io/part-of: eks-benchmark
+        app.kubernetes.io/component: api
+      annotations:
+        kubernetes.io/change-cause: "fastapi deploy"
+    spec:
+      terminationGracePeriodSeconds: 45
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: fastapi
+
+      containers:
+        - name: fastapi
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:fastapi-baseline
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+
+          # env from eso secret
+          env:
+            - name: POSTGRES__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__HOST
+            - name: POSTGRES__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PORT
+            - name: POSTGRES__DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__DB
+            - name: POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__USER
+            - name: POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PASSWORD
+            - name: PROJECT
+              value: "eks-benchmark"
+            - name: ENV
+              value: "kafka"
+            - name: DEBUG
+              # value: "true"
+              value: "false"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: POOL_SIZE
+              value: "5"
+            - name: MAX_OVERFLOW
+              value: "0"
+            - name: WORKER
+              value: "1"
+
+          # startup
+          startupProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30   # ~150s max startup
+
+          # health check
+          readinessProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+            initialDelaySeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+            initialDelaySeconds: 30
+
+          lifecycle:
+            preStop:  # time before stop,
+              exec:
+                command: ["sh", "-c", "sleep 20"]
+
+          resources:
+            requests:
+              cpu: "1024m"
+              memory: "1024Mi"
+            limits:
+              cpu: "1024m"
+              memory: "1024Mi"
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: fastapi
+spec:
+  selector:
+    app.kubernetes.io/name: fastapi
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fastapi-pdb
+  namespace: backend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fastapi
+---
+# hpa
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: fastapi-hpa
+  namespace: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: fastapi
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+        - type: Pods
+          value: 1
+          periodSeconds: 30
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+      selectPolicy: Max

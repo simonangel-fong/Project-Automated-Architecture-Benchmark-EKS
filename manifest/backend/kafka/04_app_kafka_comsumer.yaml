@@ -1,0 +1,239 @@
+# namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consumer
+---
+# external secret
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: app-cred
+  namespace: consumer
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-global
+    kind: ClusterSecretStore
+  target:
+    name: app-cred
+    creationPolicy: Owner
+  data:
+    - secretKey: POSTGRES__HOST
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_host
+    - secretKey: POSTGRES__PORT
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_port
+    - secretKey: POSTGRES__DB
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_dbname
+    - secretKey: POSTGRES__USER
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_username
+    - secretKey: POSTGRES__PASSWORD
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_password
+    - secretKey: FLYWAY_URL
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: flyway_url
+    - secretKey: APP_USER_PASSWORD
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_app_pwd
+    - secretKey: APP_READONLY_PASSWORD
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: db_readonly_pwd
+    - secretKey: REDIS__HOST
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: redis_host
+    - secretKey: REDIS__PORT
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: redis_port
+    - secretKey: KAFKA__USE_MSK_AUTH
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: kafka_use_msk_auth
+    - secretKey: KAFKA__BOOTSTRAP_SERVERS
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: kafka_bootstrap_servers
+    - secretKey: KAFKA__TOPIC
+      remoteRef:
+        key: eks-benchmark-kafka
+        property: kafka_topic
+---
+# sa
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: msk-kafka-consumer
+  namespace: consumer
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::099139718958:role/eks-benchmark-kafka-msk-kafka-consumer
+---
+
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: kafka-consumer-config
+#   namespace: consumer
+# data:
+#   APP_NAME: "eks-benchmark"
+#   ENV: "kafka"
+#   DEBUG: "true"
+#   AWS_REGION: "ca-central-1"
+#   POOL_SIZE: "5"
+#   MAX_OVERFLOW: "0"
+#   KAFKA__USE_MSK_AUTH: "true"
+#   KAFKA__GROUP_ID: "telemetry-consumer-group"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+  namespace: consumer
+  labels:
+    app.kubernetes.io/name: kafka-consumer
+    app.kubernetes.io/part-of: eks-benchmark
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-consumer
+        app.kubernetes.io/part-of: eks-benchmark
+        app.kubernetes.io/component: worker
+      annotations:
+        kubernetes.io/change-cause: "kafka-consumer deploy"
+    spec:
+      serviceAccountName: msk-kafka-consumer
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: kafka-consumer
+          image: 099139718958.dkr.ecr.ca-central-1.amazonaws.com/auto-benchmark:kafka-consumer
+          imagePullPolicy: Always
+
+          # envFrom:
+          #   - configMapRef:
+          #       name: kafka-consumer-config
+
+          env:
+            - name: POSTGRES__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__HOST
+            - name: POSTGRES__PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PORT
+            - name: POSTGRES__DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__DB
+            - name: POSTGRES__USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__USER
+            - name: POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: POSTGRES__PASSWORD
+            - name: KAFKA__BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__BOOTSTRAP_SERVERS
+            - name: KAFKA__TOPIC
+              valueFrom:
+                secretKeyRef:
+                  name: app-cred
+                  key: KAFKA__TOPIC
+
+            - name: APP_NAME
+              value: "eks-benchmark"
+            - name: ENV
+              value: "kafka"
+            - name: DEBUG
+              value: "true"
+            - name: AWS_REGION
+              value: "ca-central-1"
+            - name: POOL_SIZE
+              value: "5"
+            - name: MAX_OVERFLOW
+              value: "0"
+            - name: KAFKA__USE_MSK_AUTH
+              value: "true"
+            - name: KAFKA__GROUP_ID
+              value: "telemetry-consumer"
+          resources:
+            requests:
+              cpu: "512m"
+              memory: "512Mi"
+            limits:
+              cpu: "512m"
+              memory: "512Mi"
+---
+# # hpa
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: kafka-consumer-hpa
+#   namespace: consumer
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: kafka-consumer
+#   minReplicas: 1
+#   maxReplicas: 4
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 60
+#   behavior:
+#     scaleUp:
+#       stabilizationWindowSeconds: 0
+#       policies:
+#         - type: Percent
+#           value: 100
+#           periodSeconds: 30
+#         - type: Pods
+#           value: 2
+#           periodSeconds: 30
+#       selectPolicy: Max
+#     scaleDown:
+#       stabilizationWindowSeconds: 60
+#       policies:
+#         - type: Percent
+#           value: 25
+#           periodSeconds: 60
+#       selectPolicy: Max
