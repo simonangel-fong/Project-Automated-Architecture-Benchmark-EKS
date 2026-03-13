@@ -39,5 +39,5 @@ backend.config
 .env
 # test/k6/report
 
-project_video/
+assets/
 *.mp4
