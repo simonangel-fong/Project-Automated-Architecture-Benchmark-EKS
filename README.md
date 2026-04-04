@@ -73,7 +73,7 @@ Each architecture addresses a limitation of the previous, tested under identical
 
 ![kafka](./app/html/img/diagram/kafka.gif)
 
-[EKS Challenges](./docs/eks/eks.md)
+[EKS Challenges](./docs/eks/eks.md) | [ECS vs EKS](./docs/ecs_eks/ecs_eks.md)
 
 ---
 
