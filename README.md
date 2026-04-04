@@ -11,7 +11,6 @@ Welcome to visit my project website 👉 [website](https://eks-benchmark.arguswa
   - [Results](#results)
   - [Four Designs](#four-designs)
   - [One Pipeline](#one-pipeline)
-  - [Tech Stack](#tech-stack)
 
 ---
 
@@ -58,7 +57,7 @@ Four architectures were tested in progression — Baseline, Auto-Scaling, Redis 
 | Redis        | 🟢 High             | 🟡 Medium        | 🟠 Medium        | 🟠 Medium  |
 | Kafka        | 🟢 Very High        | 🟢 Low           | 🔴 High          | 🔴 High    |
 
-<!-- [Further analysis — load profile, metric behavior, and per-design breakdown](link) -->
+[Metric Analysis](./docs/metric/metric.md)
 
 ---
 
@@ -74,7 +73,7 @@ Each architecture addresses a limitation of the previous, tested under identical
 
 ![kafka](./app/html/img/diagram/kafka.gif)
 
-<!-- [Architecture deep dives — design decisions, trade-offs, and technical challenges](link) -->
+[EKS Challenges](./docs/eks/eks.md)
 
 ---
 
@@ -90,17 +89,3 @@ One automated workflow runs across all four designs — ensuring every benchmark
 | 4    | Tear down infrastructure | Terraform        |
 
 ![pipeline](./docs/resource/github_action.gif)
-
-<!-- [Pipeline design decisions — why GitHub Actions, why k6, and how state is managed across steps](link) -->
-
----
-
-## Tech Stack
-
-| Role               | Tools                                                |
-| ------------------ | ---------------------------------------------------- |
-| **Infrastructure** | AWS ECS · RDS · ElastiCache · MSK · Terraform · Helm |
-| **CI/CD**          | GitHub Actions · Docker                              |
-| **Load Testing**   | k6                                                   |
-| **Observability**  | Grafana · CloudWatch                                 |
-| **Backend**        | Python · FastAPI                                     |
