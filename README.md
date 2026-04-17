@@ -11,9 +11,9 @@ Welcome to visit my project website 👉 [website](https://eks-benchmark.arguswa
   - [Results](#results)
   - [Four Designs](#four-designs)
   - [One Pipeline](#one-pipeline)
-  - [Load Test Methodology](#load-test-methodology)
+  - [Load Test](#load-test)
   - [Cost \& FinOps](#cost--finops)
-  - [Lessions](#lessions)
+  - [Debug Lessons](#debug-lessons)
 
 ---
 
@@ -70,11 +70,19 @@ Each architecture addresses a limitation of the previous, tested under identical
 
 ![baseline](./app/html/img/diagram/baseline.gif)
 
+> Single pod connected to RDS
+
 ![scale](./app/html/img/diagram/scale.gif)
+
+> Multiple pods with HPA for autoscaling
 
 ![redis](./app/html/img/diagram/redis.gif)
 
+> Cache layer for read workload
+
 ![kafka](./app/html/img/diagram/kafka.gif)
+
+> Event-driven layer for write workload
 
 [EKS Challenges](./docs/eks/eks.md) | [ECS vs EKS](./docs/ecs_eks/ecs_eks.md)
 
@@ -95,7 +103,7 @@ One automated workflow runs across all four designs — ensuring every benchmark
 
 ---
 
-## Load Test Methodology
+## Load Test
 
 Each architecture was tested under identical conditions using a mixed read/write k6 script (`1:1` ratio to expose async writes), sourced from AWS Montreal.
 
@@ -115,9 +123,15 @@ Each architecture was tested under identical conditions using a mixed read/write
 
 ## Cost & FinOps
 
-FinOps practices applied: HPA auto-scaling, automated tear-down after every run, and cost allocation tags per architecture. Infrastructure exists only during the ~27-minute test window.
+FinOps practices applied:
 
-**Monthly equivalent (always-on, production estimate):**
+- HPA auto-scaling,
+- automated tear-down after every run,
+- and cost allocation tags per architecture.
+
+Infrastructure exists only during the ~27-minute test window.
+
+**Monthly equivalent (production estimate):**
 
 | Architecture | Est. Monthly | Per Benchmark Run | Cost Driver                   |
 | ------------ | ------------ | ----------------- | ----------------------------- |
@@ -126,11 +140,13 @@ FinOps practices applied: HPA auto-scaling, automated tear-down after every run,
 | Redis        | ~$395        | ~$0.24            | +1 × c6i.xlarge + ElastiCache |
 | Kafka        | ~$507        | ~$0.31            | +MSK 3-broker cluster         |
 
-> Kafka costs more to operate but eliminates DB overload risk, deferring vertical DB scaling. Scale is costed at peak pod count (conservative). Storage and ALB LCU charges excluded — see [FinOps & Cost](docs/cost.md) for full breakdown.
+> - Kafka costs more to operate but eliminates DB overload risk, deferring vertical DB scaling.
+> - Scale is costed at peak pod count (conservative).
+> - Storage and ALB LCU charges excluded — see [FinOps & Cost](docs/cost.md) for full breakdown.
 
 ---
 
-## Lessions
+## Debug Lessons
 
 **HPA silently inactive**
 
@@ -143,3 +159,9 @@ FinOps practices applied: HPA auto-scaling, automated tear-down after every run,
 - **Issue:** `terraform apply` failed after a manual in-cluster change
 - **Root Cause:** Terraform lost track of a resource modified outside its state
 - **Fix:** Hard separation — Terraform owns AWS infra; Helm/kubectl owns all Kubernetes resources
+
+**Cost Allocation Tags returned no results in Cost Explorer**
+
+- **Issue**: `Cost Explorer` returned no results when filtering by tags, even though tags were defined in `Terraform`
+- **Root Cause**: The `GitHub Actions` variable for the tag value was empty, resulting in a tag with a blank value in AWS
+- **Fix**: Validate tag values (not just keys); add workflow input checks or a Terraform validation block to fail on empty required values

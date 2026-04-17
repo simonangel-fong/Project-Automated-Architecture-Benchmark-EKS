@@ -1,5 +1,23 @@
 # FinOps & Cost Management
 
+[Back](../README.md)
+
+- [FinOps \& Cost Management](#finops--cost-management)
+  - [Common FinOps Practices](#common-finops-practices)
+  - [FinOps in This Project](#finops-in-this-project)
+    - [What's Already in Place](#whats-already-in-place)
+    - [Lesson Learned: Empty Tag Value from GitHub Actions Variable](#lesson-learned-empty-tag-value-from-github-actions-variable)
+    - [Further FinOps Improvements for Production](#further-finops-improvements-for-production)
+  - [Cost Estimation by Architecture](#cost-estimation-by-architecture)
+    - [Baseline](#baseline)
+    - [Scale](#scale)
+    - [Redis](#redis)
+    - [Kafka](#kafka)
+    - [Per-Run Cost (Benchmark, ~27 min)](#per-run-cost-benchmark-27-min)
+    - [AWS Pricing Calculator](#aws-pricing-calculator)
+
+---
+
 ## Common FinOps Practices
 
 | Practice                               | What It Means                                                                     | When to Apply                                                            |
@@ -28,11 +46,17 @@ Every benchmark run follows: provision → smoke test → load test → destroy.
 **Cost Allocation Tags**
 Resources are tagged at provisioning time to enable per-architecture cost tracking in AWS Cost Explorer.
 
+---
+
 ### Lesson Learned: Empty Tag Value from GitHub Actions Variable
 
-Cost Allocation Tags were correctly defined in Terraform and tag values were passed in via GitHub Actions variables — but the variable was left empty during development and never populated before running the benchmark. The tag key existed in AWS; the value was blank, so Cost Explorer filters returned no results.
+`Cost Allocation Tags` were correctly defined in Terraform and tag values were passed in via GitHub Actions variables — but the variable was left empty during development and never populated before running the benchmark. The tag key existed in AWS; the value was blank, so Cost Explorer filters returned no results.
 
 Takeaway: tags must be validated at the value level, not just the key level. When tag values come from CI/CD variables, add an explicit check (e.g., a workflow input validation step or a Terraform variable `validation` block) to fail fast if a required tag value is missing, rather than silently tagging resources with an empty string.
+
+![pic](../docs/resource/cost_allocation_tag.png)
+
+---
 
 ### Further FinOps Improvements for Production
 
@@ -73,6 +97,8 @@ Costs below are estimated for production-equivalent, always-on deployment (month
 | **EC2 HPA Node**      | **0** × c6i.xlarge         | $0.186/hr     | 730 hours     | ~$0          |
 | **Total**             |                            |               |               | **~$246**    |
 
+---
+
 ### Scale
 
 | Service               | Configuration              | Pricing Basis | Usage Monthly | Est. Monthly |
@@ -84,6 +110,8 @@ Costs below are estimated for production-equivalent, always-on deployment (month
 | EC2 Managed Node      | 2 × t3.medium              | $0.0464/hr    | 730 hours     | ~$67.74      |
 | EC2 HPA Node          | **2** × c6i.xlarge         | $0.186/hr     | 730 hours     | ~$271.56     |
 | **Total**             |                            |               |               | **~$518**    |
+
+---
 
 ### Redis
 
@@ -97,6 +125,8 @@ Costs below are estimated for production-equivalent, always-on deployment (month
 | EC2 HPA Node          | **1** × c6i.xlarge         | $0.186/hr     | 730 hours     | ~$135.78     |
 | ElastiCache           | 1 × cache.t4g.micro        | $0.018/hr     | 730 hours     | ~$13.14      |
 | **Total**             |                            |               |               | **~$395**    |
+
+---
 
 ### Kafka
 
@@ -112,7 +142,11 @@ Costs below are estimated for production-equivalent, always-on deployment (month
 | MSK (Kafka)           | 3 × kafka.t3.small         | $0.0508/hr    | 730 hours     | ~$111.25     |
 | **Total**             |                            |               |               | **~$507**    |
 
-> Scale architecture cost varies with traffic. Redis reduces DB CPU load (delaying the need to upsize RDS). Kafka costs the most to operate but eliminates DB overload risk — deferring the need for vertical DB scaling, which would itself add cost.
+> - Scale architecture cost varies with traffic.
+> - Redis reduces DB CPU load (delaying the need to upsize RDS).
+> - Kafka costs the most to operate but eliminates DB overload risk — deferring the need for vertical DB scaling, which would itself add cost.
+
+---
 
 ### Per-Run Cost (Benchmark, ~27 min)
 
@@ -126,13 +160,16 @@ Costs below are estimated for production-equivalent, always-on deployment (month
 > Per-run costs are prorated at 0.45 hrs (27 min) against each architecture's hourly rates. Annualized figures assume one benchmark run per week (52 runs/year). Actual costs depend on region, data transfer volume, and AWS pricing changes.
 
 > **Estimation scope notes:**
+>
 > - **Storage costs omitted**: RDS gp3 storage (~20 GB minimum, ~$2.30/mo) and EC2 node root EBS volumes (~30 GB per node, ~$6/mo for 2 nodes) are not included. These are consistent across architectures and small relative to compute costs.
 > - **ALB LCU charges omitted**: Tables price only the ALB base hourly rate ($0.02475/hr). At production-level RPS (1,000 req/s), LCU charges will exceed the base rate and vary with traffic; use the [AWS Pricing Calculator](https://calculator.aws/pricing/2/home) for a traffic-adjusted estimate.
 > - **Scale HPA node count is peak-based**: The Scale architecture is costed at 2 HPA nodes (4 total), matching the benchmark peak. In practice, HPA scales nodes down during low-traffic periods, so real production cost would be lower on average. The estimate is intentionally conservative.
 
+---
+
 ### AWS Pricing Calculator
 
-To generate an accurate quote, use the [AWS Pricing Calculator](https://calculator.aws/pricing/2/home) and add the following services:
+To generate an accurate quote, use the [AWS Pricing Calculator](https://calculator.aws/) and add the following services:
 
 - **Amazon EKS** — 1 cluster
 - **Amazon EC2** — instance type and count per architecture
