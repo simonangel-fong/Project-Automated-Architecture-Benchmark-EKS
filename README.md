@@ -56,7 +56,7 @@ Four architectures were tested in progression — Baseline, Auto-Scaling, Redis 
 | Architecture | Business Continuity | DB Overload Risk | Operational Cost | Complexity |
 | ------------ | ------------------- | ---------------- | ---------------- | ---------- |
 | Baseline     | ❌ Low              | 🔴 High          | 🟢 Low           | 🟢 Low     |
-| Scale        | 🟢 High             | 🟠 Medium–High   | 🟠 Medium        | 🟠 Medium  |
+| Scale        | 🟢 High             | 🟠 Medium–High   | 🔴 High          | 🟠 Medium  |
 | Redis        | 🟢 High             | 🟡 Medium        | 🟠 Medium        | 🟠 Medium  |
 | Kafka        | 🟢 Very High        | 🟢 Low           | 🔴 High          | 🔴 High    |
 
