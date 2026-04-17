@@ -119,6 +119,8 @@ Each architecture was tested under identical conditions using a mixed read/write
 - HTTP failure rate < 1%
 - p95 latency < 300ms
 
+![pic](./docs/resource/k6_cloud.png)
+
 ---
 
 ## Cost & FinOps
