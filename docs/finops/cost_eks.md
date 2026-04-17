@@ -1,6 +1,6 @@
 # FinOps & Cost Management
 
-[Back](../README.md)
+[Back](../../README.md)
 
 - [FinOps \& Cost Management](#finops--cost-management)
   - [Common FinOps Practices](#common-finops-practices)

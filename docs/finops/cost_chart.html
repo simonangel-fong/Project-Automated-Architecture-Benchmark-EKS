@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ECS vs EKS Cost Comparison</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    body { font-family: sans-serif; background: #f9fafb; display: flex; justify-content: center; padding: 40px; }
+    .container { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); max-width: 700px; width: 100%; }
+    h2 { margin: 0 0 4px; font-size: 1.2rem; color: #111; }
+    p { margin: 0 0 24px; font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ECS vs EKS Monthly Cost by Architecture</h2>
+    <p>ca-central-1 On-Demand pricing estimates</p>
+    <canvas id="chart"></canvas>
+  </div>
+  <script>
+    Chart.register(ChartDataLabels);
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Baseline', 'Scale', 'Redis', 'Kafka'],
+        datasets: [
+          {
+            label: 'ECS ($/mo)',
+            data: [145, 819, 753, 626],
+            backgroundColor: 'rgba(59, 130, 246, 0.75)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            borderRadius: 4,
+          },
+          {
+            label: 'EKS ($/mo)',
+            data: [246, 518, 395, 507],
+            backgroundColor: 'rgba(16, 185, 129, 0.75)',
+            borderColor: 'rgba(16, 185, 129, 1)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` $${ctx.parsed.y}/mo`
+            }
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            formatter: v => `$${v}`,
+            font: { size: 11, weight: 'bold' },
+            color: '#333'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: v => `$${v}`
+            },
+            title: { display: true, text: 'Monthly Cost (USD)' }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

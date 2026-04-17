@@ -144,7 +144,9 @@ Infrastructure exists only during the ~27-minute test window.
 
 > - Kafka costs more to operate but eliminates DB overload risk, deferring vertical DB scaling.
 > - Scale is costed at peak pod count (conservative).
-> - Storage and ALB LCU charges excluded — see [FinOps & Cost](docs/cost.md) for full breakdown.
+> - Storage and ALB LCU charges excluded — see [FinOps & Cost](docs/finops/cost_eks.md) for full breakdown.
+
+[FinOps: ECS vs EKS](./docs/finops/cost_ecs_vs_eks.md)
 
 ---
 
