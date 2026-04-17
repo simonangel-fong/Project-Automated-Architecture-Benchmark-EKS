@@ -68,21 +68,17 @@ Four architectures were tested in progression — Baseline, Auto-Scaling, Redis 
 
 Each architecture addresses a limitation of the previous, tested under identical conditions.
 
-![baseline](./app/html/img/diagram/baseline.gif)
+- Baseline: Single pod connected to RDS
+  ![baseline](./app/html/img/diagram/baseline.gif)
 
-> Single pod connected to RDS
+- Scale: Multiple pods with HPA for autoscaling
+  ![scale](./app/html/img/diagram/scale.gif)
 
-![scale](./app/html/img/diagram/scale.gif)
+- Redis: Cache layer for read workload
+  ![redis](./app/html/img/diagram/redis.gif)
 
-> Multiple pods with HPA for autoscaling
-
-![redis](./app/html/img/diagram/redis.gif)
-
-> Cache layer for read workload
-
-![kafka](./app/html/img/diagram/kafka.gif)
-
-> Event-driven layer for write workload
+- Kafka: Event-driven layer for write workload
+  ![kafka](./app/html/img/diagram/kafka.gif)
 
 [EKS Challenges](./docs/eks/eks.md) | [ECS vs EKS](./docs/ecs_eks/ecs_eks.md)
 
