@@ -54,7 +54,7 @@ Resources are tagged at provisioning time to enable per-architecture cost tracki
 
 Takeaway: tags must be validated at the value level, not just the key level. When tag values come from CI/CD variables, add an explicit check (e.g., a workflow input validation step or a Terraform variable `validation` block) to fail fast if a required tag value is missing, rather than silently tagging resources with an empty string.
 
-![pic](../docs/resource/cost_allocation_tag.png)
+![pic](../resource/cost_allocation_tag.png)
 
 ---
 
