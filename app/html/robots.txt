@@ -1,0 +1,36 @@
+# robots.txt — block automated crawlers, allow social link previews
+
+# Default: block everything
+User-agent: *
+Disallow: /
+Crawl-delay: 10
+
+# Allow LinkedIn's link-preview crawler so Featured / posts render
+User-agent: LinkedInBot
+Allow: /
+
+# Allow other social previews (optional — add only the ones you use)
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+# Explicitly deny aggressive SEO crawlers
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
